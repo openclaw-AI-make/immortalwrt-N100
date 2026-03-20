@@ -1,11 +1,7 @@
-name: Build ImmortalWrt for x86_64
+name: Build ImmortalWrt x86_64
 
 on:
   push:
-    branches:
-      - main
-      - master
-  pull_request:
     branches:
       - main
       - master
@@ -17,7 +13,6 @@ env:
   TARGET: x86
   SUBTARGET: 64
   CONFIG_FILE: configs/x86_64.config
-  MAKE_JOBS: 2
 
 jobs:
   build:
@@ -31,18 +26,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Check Free Disk Space
+      - name: Free Disk Space
         run: |
           echo "=== Before Cleanup ==="
           df -h
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /opt/ghc
-          sudo rm -rf /usr/local/share/boost
-          sudo rm -rf /usr/local/lib/android
-          sudo rm -rf /usr/local/.ghcup
-          sudo rm -rf /usr/share/chromium
-          sudo rm -rf /usr/local/android-sdk
-          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost
+          sudo rm -rf /usr/local/lib/android /usr/local/.ghcup
+          sudo rm -rf /usr/share/chromium /usr/local/android-sdk
           echo "=== After Cleanup ==="
           df -h
 
@@ -52,8 +42,8 @@ jobs:
           sudo apt-get install -y build-essential ccache ecj fastjar file g++ gawk \
             gettext git java-propose-classpath libelf-dev libncurses5-dev \
             libncursesw5-dev libssl-dev libxml2-dev make ninja-build p7zip-full \
-            patch python2.7 python3 python3-dev python3-pip python3-setuptools \
-            python3-distutils rsync unzip wget zlib1g-dev
+            patch python3 python3-dev python3-pip python3-setuptools \
+            python3-distutils rsync unzip wget zlib1g-dev subversion
 
       - name: Clone ImmortalWrt Source
         run: |
@@ -70,7 +60,7 @@ jobs:
 
       - name: Copy Configuration
         run: |
-          cp ${{ env.CONFIG_FILE }} immortalwrt/.config
+          cp $GITHUB_WORKSPACE/${{ env.CONFIG_FILE }} immortalwrt/.config
           cd immortalwrt
           make defconfig
 
@@ -84,36 +74,19 @@ jobs:
         run: |
           cd immortalwrt
           echo "=== Build Started ==="
-          echo "Disk space before build:"
           df -h .
-          echo ""
-          echo "Starting make -j${{ env.MAKE_JOBS }}..."
-          
-          # 设置下载重试和镜像
-          export CONFIG_SCC_URI="https://github.com/immortalwrt/packages.git"
-          export CONFIG_FEEDS_PACKAGES="https://github.com/immortalwrt/packages.git"
-          
-          # 开始编译（单线程查看详细错误）
-          make -j1 V=sc 2>&1 | tee build.log
+          echo "Starting build..."
+          make -j$(nproc) V=s 2>&1 | tee build.log
           BUILD_STATUS=${PIPESTATUS[0]}
-          
-          echo ""
           echo "=== Build Finished ==="
           echo "Exit code: $BUILD_STATUS"
-          echo "Disk space after build:"
           df -h .
-          
           if [ $BUILD_STATUS -ne 0 ]; then
-            echo ""
             echo "=== BUILD FAILED ==="
-            echo "Searching for errors..."
             grep -i "error" build.log | tail -100
-            echo ""
-            echo "=== Last 500 lines ==="
             tail -500 build.log
             exit $BUILD_STATUS
           fi
-          
           echo "status=success" >> $GITHUB_OUTPUT
         id: build
 
@@ -136,11 +109,11 @@ jobs:
           body: |
             ## ImmortalWrt for Intel N100 (x86_64)
             
-            **Build Date:** ${{ github.event.head_commit.timestamp || github.event.pull_request.merged_at || 'Manual build' }}
+            **Build Date:** ${{ github.event.head_commit.timestamp || 'Manual build' }}
             **Source Commit:** ${{ steps.clone.outputs.commit }}
             
             ### Files
-            - *.gz - Combined image (recommended)
+            - *.gz - Combined image
             - *.vmdk - VMware image
             - *.qcow2 - QEMU/KVM image
             - build.config - Build configuration
