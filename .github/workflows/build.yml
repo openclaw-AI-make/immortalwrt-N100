@@ -33,11 +33,17 @@ jobs:
 
       - name: Check Free Disk Space
         run: |
+          echo "=== Before Cleanup ==="
           df -h
           sudo rm -rf /usr/share/dotnet
           sudo rm -rf /opt/ghc
           sudo rm -rf /usr/local/share/boost
           sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /usr/local/.ghcup
+          sudo rm -rf /usr/share/chromium
+          sudo rm -rf /usr/local/android-sdk
+          sudo rm -rf /usr/share/dotnet
+          echo "=== After Cleanup ==="
           df -h
 
       - name: Install Dependencies
@@ -83,11 +89,12 @@ jobs:
           echo ""
           echo "Starting make -j${{ env.MAKE_JOBS }}..."
           
-          # 设置下载重试
+          # 设置下载重试和镜像
           export CONFIG_SCC_URI="https://github.com/immortalwrt/packages.git"
+          export CONFIG_FEEDS_PACKAGES="https://github.com/immortalwrt/packages.git"
           
-          # 开始编译
-          make -j${{ env.MAKE_JOBS }} V=s 2>&1 | tee build.log
+          # 开始编译（单线程查看详细错误）
+          make -j1 V=sc 2>&1 | tee build.log
           BUILD_STATUS=${PIPESTATUS[0]}
           
           echo ""
@@ -100,10 +107,10 @@ jobs:
             echo ""
             echo "=== BUILD FAILED ==="
             echo "Searching for errors..."
-            grep -i "error" build.log | tail -50
+            grep -i "error" build.log | tail -100
             echo ""
-            echo "Last 300 lines of log:"
-            tail -300 build.log
+            echo "=== Last 500 lines ==="
+            tail -500 build.log
             exit $BUILD_STATUS
           fi
           
