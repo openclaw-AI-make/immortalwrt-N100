@@ -16,8 +16,8 @@ env:
   REPO_BRANCH: openwrt-23.05
   TARGET: x86
   SUBTARGET: 64
-  CONFIG_FILE: configs/x86_64.config
-  MAKE_JOBS: 2
+  CONFIG_FILE: configs/x86_64-simple.config
+  MAKE_JOBS: 4
 
 jobs:
   build:
