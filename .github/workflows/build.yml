@@ -77,19 +77,36 @@ jobs:
       - name: Build Firmware
         run: |
           cd immortalwrt
-          echo "Starting build with ${{ env.MAKE_JOBS }} jobs..."
+          echo "=== Build Started ==="
           echo "Disk space before build:"
           df -h .
+          echo ""
+          echo "Starting make -j${{ env.MAKE_JOBS }}..."
+          
+          # 设置下载重试
+          export CONFIG_SCC_URI="https://github.com/immortalwrt/packages.git"
+          
+          # 开始编译
           make -j${{ env.MAKE_JOBS }} V=s 2>&1 | tee build.log
           BUILD_STATUS=${PIPESTATUS[0]}
+          
+          echo ""
+          echo "=== Build Finished ==="
+          echo "Exit code: $BUILD_STATUS"
           echo "Disk space after build:"
           df -h .
+          
           if [ $BUILD_STATUS -ne 0 ]; then
-            echo "Build failed with exit code $BUILD_STATUS!"
-            echo "Last 200 lines of log:"
-            tail -200 build.log
+            echo ""
+            echo "=== BUILD FAILED ==="
+            echo "Searching for errors..."
+            grep -i "error" build.log | tail -50
+            echo ""
+            echo "Last 300 lines of log:"
+            tail -300 build.log
             exit $BUILD_STATUS
           fi
+          
           echo "status=success" >> $GITHUB_OUTPUT
         id: build
 
