@@ -17,6 +17,7 @@ env:
   TARGET: x86
   SUBTARGET: 64
   CONFIG_FILE: configs/x86_64.config
+  MAKE_JOBS: 2
 
 jobs:
   build:
@@ -76,12 +77,19 @@ jobs:
       - name: Build Firmware
         run: |
           cd immortalwrt
-          echo "Starting build..."
-          make -j$(nproc) V=s 2>&1 | tee build.log || {
-            echo "Build failed! Last 100 lines of log:"
-            tail -100 build.log
-            exit 1
-          }
+          echo "Starting build with ${{ env.MAKE_JOBS }} jobs..."
+          echo "Disk space before build:"
+          df -h .
+          make -j${{ env.MAKE_JOBS }} V=s 2>&1 | tee build.log
+          BUILD_STATUS=${PIPESTATUS[0]}
+          echo "Disk space after build:"
+          df -h .
+          if [ $BUILD_STATUS -ne 0 ]; then
+            echo "Build failed with exit code $BUILD_STATUS!"
+            echo "Last 200 lines of log:"
+            tail -200 build.log
+            exit $BUILD_STATUS
+          fi
           echo "status=success" >> $GITHUB_OUTPUT
         id: build
 
