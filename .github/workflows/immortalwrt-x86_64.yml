@@ -1,0 +1,95 @@
+name: Build ImmortalWrt x86_64
+
+on:
+  workflow_dispatch:
+
+env:
+  REPO_URL: https://github.com/immortalwrt/immortalwrt
+  REPO_BRANCH: openwrt-24.10
+  FEEDS_CONF: feeds.conf.default
+  CONFIG_FILE: .config
+  DIY_P1_SH: diy-part1.sh
+  DIY_P2_SH: diy-part2.sh
+  TZ: Asia/Shanghai
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Free disk space
+        run: |
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo docker image prune -af || true
+          df -h
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
+            ccache cmake cpio curl device-tree-compiler ecj fastjar flex gawk gettext \
+            gcc-multilib g++-multilib git gperf haveged help2man intltool libc6-dev-i386 \
+            libelf-dev libfuse-dev libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev \
+            libmpfr-dev libncurses5-dev libncursesw5-dev libpython3-dev libreadline-dev \
+            libssl-dev libtool lrzsz mkisofs msmtp nano ninja-build p7zip p7zip-full \
+            patch pkgconf python3 python3-pip python3-ply python3-docutils python3-setuptools \
+            qemu-utils rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl \
+            unzip vim wget xmlto xsltproc xz-utils zlib1g-dev zstd
+          sudo timedatectl set-timezone "$TZ"
+
+      - name: Clone source
+        run: |
+          git clone --depth 1 -b $REPO_BRANCH $REPO_URL openwrt
+          cd openwrt
+          chmod +x ../$DIY_P1_SH
+          ../$DIY_P1_SH
+
+      - name: Update feeds
+        run: |
+          cd openwrt
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+
+      - name: Load custom config
+        run: |
+          cd openwrt
+          [ -e ../files ] && mv ../files files
+          [ -e ../$CONFIG_FILE ] && mv ../$CONFIG_FILE .config
+          chmod +x ../$DIY_P2_SH
+          ../$DIY_P2_SH
+          make defconfig
+
+      - name: Download packages
+        run: |
+          cd openwrt
+          make download -j$(nproc) || make download -j1 V=s
+          find dl -size -1024c -exec rm -f {} \;
+
+      - name: Build firmware
+        run: |
+          cd openwrt
+          make -j$(nproc) V=s || make -j1 V=s
+
+      - name: Prepare artifacts
+        run: |
+          cd openwrt/bin/targets/*/*
+          ls -lh
+          mkdir -p /tmp/artifacts
+          cp -f *.img.gz /tmp/artifacts/ 2>/dev/null || true
+          cp -f *.bin /tmp/artifacts/ 2>/dev/null || true
+          cp -f *.manifest /tmp/artifacts/ 2>/dev/null || true
+          cp -f *.buildinfo /tmp/artifacts/ 2>/dev/null || true
+          cp -f *.json /tmp/artifacts/ 2>/dev/null || true
+          cp -f sha256sums /tmp/artifacts/ 2>/dev/null || true
+
+      - name: Upload firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: immortalwrt-x86_64-firmware
+          path: /tmp/artifacts/
