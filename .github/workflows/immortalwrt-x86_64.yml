@@ -12,7 +12,6 @@ env:
   DIY_P2_SH: diy-part2.sh
   TZ: Asia/Shanghai
   CCACHE_DIR: /home/runner/.ccache
-  CCACHE_SIZE: 10G
 
 jobs:
   build:
@@ -80,6 +79,12 @@ jobs:
           chmod +x ../$DIY_P2_SH
           ../$DIY_P2_SH
           make defconfig
+
+      - name: Download packages
+        run: |
+          cd openwrt
+          make download -j$(nproc) || make download -j1 V=s
+          find dl -size -1024c -exec rm -f {} \;
 
       - name: Build firmware
         run: |
