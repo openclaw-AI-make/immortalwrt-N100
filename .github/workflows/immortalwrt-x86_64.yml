@@ -53,15 +53,13 @@ jobs:
       - name: Update feeds
         run: |
           cd openwrt
-          ./scripts/feeds update -a
-          # 显式安装需要的包
-          ./scripts/feeds install -a -p openclash
-          ./scripts/feeds install -a -p turboacc
-          ./scripts/feeds install -a -p packages
-          ./scripts/feeds install -a -p luci
-          # 安装 AdGuard Home 相关
-          ./scripts/feeds install -a -p adguardhome_luci || true
-          ./scripts/feeds install -a -f  # 强制安装所有剩余包
+          # 重试机制 - 防止网络超时
+          for i in 1 2 3; do
+            echo "尝试更新 feeds (第 $i 次)..."
+            ./scripts/feeds update -a && break || sleep 10
+          done
+          # 安装所有 feeds 包（不指定 -p 避免冲突）
+          ./scripts/feeds install -a
 
       - name: Load custom config
         run: |
