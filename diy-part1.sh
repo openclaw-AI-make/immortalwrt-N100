@@ -10,7 +10,10 @@ src-git openclash https://github.com/vernesong/OpenClash
 # Turbo ACC
 src-git turboacc https://github.com/chenmozhijin/turboacc.git;luci
 
-# AdGuard Home LuCI（本体 adguardhome 走官方包，这里只补 LuCI）
-src-git adguardhome_luci https://github.com/rufengsuixing/luci-app-adguardhome
+# AdGuard Home - 使用 immortalwrt 官方 packages
+src-git packages https://github.com/immortalwrt/packages
+
+# AdGuard Home LuCI
+src-git luci https://github.com/immortalwrt/luci
 EOF
 
