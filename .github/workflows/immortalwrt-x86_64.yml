@@ -11,6 +11,8 @@ env:
   DIY_P1_SH: diy-part1.sh
   DIY_P2_SH: diy-part2.sh
   TZ: Asia/Shanghai
+  CCACHE_DIR: /home/runner/.ccache
+  CCACHE_SIZE: 10G
 
 jobs:
   build:
@@ -19,6 +21,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+
+      - name: Prepare ccadir
+        run: sudo mkdir -p $CCACHE_DIR && sudo chmod 777 $CCACHE_DIR
+
+      - name: Cache ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: cc-immortalwrt-${{ github.run_id }}
+          restore-keys: |
+            cc-immortalwrt-
 
       - name: Free disk space
         run: |
@@ -53,12 +66,10 @@ jobs:
       - name: Update feeds
         run: |
           cd openwrt
-          # 重试更新 feeds
           for i in 1 2 3; do
             echo "尝试更新 feeds (第 $i 次)..."
             ./scripts/feeds update -a && break || sleep 15
           done
-          # 安装所有 feeds
           ./scripts/feeds install -a
 
       - name: Load custom config
@@ -70,16 +81,13 @@ jobs:
           ../$DIY_P2_SH
           make defconfig
 
-      - name: Download packages
-        run: |
-          cd openwrt
-          make download -j$(nproc) || make download -j1 V=s
-          find dl -size -1024c -exec rm -f {} \;
-
       - name: Build firmware
         run: |
           cd openwrt
-          make -j$(nproc) V=s || make -j1 V=s
+          make -j$(nproc) CCACHE="ccache" V=s || make -j1 V=s
+
+      - name: Show ccache stats
+        run: ccache -s
 
       - name: Prepare artifacts
         run: |
@@ -89,8 +97,6 @@ jobs:
           cp -f *.img.gz /tmp/artifacts/ 2>/dev/null || true
           cp -f *.bin /tmp/artifacts/ 2>/dev/null || true
           cp -f *.manifest /tmp/artifacts/ 2>/dev/null || true
-          cp -f *.buildinfo /tmp/artifacts/ 2>/dev/null || true
-          cp -f *.json /tmp/artifacts/ 2>/dev/null || true
           cp -f sha256sums /tmp/artifacts/ 2>/dev/null || true
 
       - name: Upload firmware
