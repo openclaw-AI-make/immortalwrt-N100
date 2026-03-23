@@ -56,7 +56,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: openwrt/dl
-          key: ${{ runner.os }}-immortalwrt-dl-${{ hashFiles('diy-part1.sh') }}
+          key: ${{ runner.os }}-immortalwrt-dl-${{ hashFiles('diy-part1.sh', 'diy-part2.sh', '.config', '.github/workflows/immortalwrt-x86_64.yml') }}
           restore-keys: |
             ${{ runner.os }}-immortalwrt-dl-
 
@@ -64,7 +64,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: openwrt/.ccache
-          key: ${{ runner.os }}-immortalwrt-ccache-${{ hashFiles('.config') }}
+          key: ${{ runner.os }}-immortalwrt-ccache-${{ hashFiles('.config', 'diy-part1.sh', 'diy-part2.sh') }}
           restore-keys: |
             ${{ runner.os }}-immortalwrt-ccache-
 
@@ -99,7 +99,7 @@ jobs:
       - name: Build firmware
         run: |
           cd openwrt
-          make -j$(nproc) || make -j1 V=s
+          make -j$(nproc) V=s || make -j1 V=s
 
       - name: Show cache stats after build
         run: |
