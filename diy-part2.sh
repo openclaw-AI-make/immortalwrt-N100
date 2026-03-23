@@ -12,12 +12,12 @@ if [ -f package/luci-app-adguardhome/Makefile ]; then
   sed -ri '/^LUCI_DEPENDS:=/s#\+(ca-certs|wget-ssl)##g' package/luci-app-adguardhome/Makefile || true
 fi
 
-# 用上游新版 frp 整包替换旧版 frp（不要只换 Makefile）
+# 用上游新版 frp 整包替换 feeds 里的旧 frp，保留原目录结构
 rm -rf feeds/packages/net/frp
-rm -rf package/frp
 git clone --depth=1 --filter=blob:none --sparse https://github.com/openwrt/packages.git /tmp/openwrt-packages
 cd /tmp/openwrt-packages
 git sparse-checkout set net/frp
 cd "$GITHUB_WORKSPACE/openwrt"
-cp -a /tmp/openwrt-packages/net/frp package/frp
+mkdir -p feeds/packages/net
+cp -a /tmp/openwrt-packages/net/frp feeds/packages/net/frp
 rm -rf /tmp/openwrt-packages
