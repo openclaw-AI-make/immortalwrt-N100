@@ -6,12 +6,10 @@ on:
 env:
   REPO_URL: https://github.com/immortalwrt/immortalwrt
   REPO_BRANCH: openwrt-24.10
-  FEEDS_CONF: feeds.conf.default
   CONFIG_FILE: .config
   DIY_P1_SH: diy-part1.sh
   DIY_P2_SH: diy-part2.sh
   TZ: Asia/Shanghai
-  CCACHE_DIR: /home/runner/.ccache
 
 jobs:
   build:
@@ -20,17 +18,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
-
-      - name: Prepare ccadir
-        run: sudo mkdir -p $CCACHE_DIR && sudo chmod 777 $CCACHE_DIR
-
-      - name: Cache ccache
-        uses: actions/cache@v4
-        with:
-          path: ~/.ccache
-          key: cc-immortalwrt-${{ github.run_id }}
-          restore-keys: |
-            cc-immortalwrt-
 
       - name: Free disk space
         run: |
@@ -58,27 +45,50 @@ jobs:
       - name: Clone source
         run: |
           git clone --depth 1 -b $REPO_BRANCH $REPO_URL openwrt
+
+      - name: Add custom feeds
+        run: |
           cd openwrt
           chmod +x ../$DIY_P1_SH
           ../$DIY_P1_SH
 
+      - name: Cache dl
+        uses: actions/cache@v4
+        with:
+          path: openwrt/dl
+          key: ${{ runner.os }}-immortalwrt-dl-${{ hashFiles('diy-part1.sh') }}
+          restore-keys: |
+            ${{ runner.os }}-immortalwrt-dl-
+
+      - name: Cache ccache
+        uses: actions/cache@v4
+        with:
+          path: openwrt/.ccache
+          key: ${{ runner.os }}-immortalwrt-ccache-${{ hashFiles('.config') }}
+          restore-keys: |
+            ${{ runner.os }}-immortalwrt-ccache-
+
       - name: Update feeds
         run: |
           cd openwrt
-          for i in 1 2 3; do
-            echo "尝试更新 feeds (第 $i 次)..."
-            ./scripts/feeds update -a && break || sleep 15
-          done
+          ./scripts/feeds update -a
           ./scripts/feeds install -a
 
       - name: Load custom config
         run: |
           cd openwrt
-          [ -e ../files ] && mv ../files files
-          [ -e ../$CONFIG_FILE ] && mv ../$CONFIG_FILE .config
+          mkdir -p .ccache
+          echo "CCACHE_DIR=$(pwd)/.ccache" >> $GITHUB_ENV
+          echo "CCACHE_BASEDIR=$(pwd)" >> $GITHUB_ENV
+          [ -e ../$CONFIG_FILE ] && cp ../$CONFIG_FILE .config
           chmod +x ../$DIY_P2_SH
           ../$DIY_P2_SH
           make defconfig
+
+      - name: Show cache stats before build
+        run: |
+          cd openwrt
+          ccache -s || true
 
       - name: Download packages
         run: |
@@ -89,20 +99,22 @@ jobs:
       - name: Build firmware
         run: |
           cd openwrt
-          make -j$(nproc) CCACHE="ccache" V=s || make -j1 V=s
+          make -j$(nproc) || make -j1 V=s
 
-      - name: Show ccache stats
-        run: ccache -s
+      - name: Show cache stats after build
+        run: |
+          cd openwrt
+          ccache -s || true
 
       - name: Prepare artifacts
         run: |
           cd openwrt/bin/targets/*/*
-          ls -lh
           mkdir -p /tmp/artifacts
-          cp -f *.img.gz /tmp/artifacts/ 2>/dev/null || true
-          cp -f *.bin /tmp/artifacts/ 2>/dev/null || true
+          cp -f *squashfs-combined-efi.img.gz /tmp/artifacts/ 2>/dev/null || true
           cp -f *.manifest /tmp/artifacts/ 2>/dev/null || true
+          cp -f *.buildinfo /tmp/artifacts/ 2>/dev/null || true
           cp -f sha256sums /tmp/artifacts/ 2>/dev/null || true
+          ls -lh /tmp/artifacts
 
       - name: Upload firmware
         uses: actions/upload-artifact@v6
