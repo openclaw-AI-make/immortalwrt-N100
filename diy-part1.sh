@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-# 追加第三方软件源（不要重复添加已存在的 feed）
 cat >> feeds.conf.default <<'EOF'
 
 # OpenClash
