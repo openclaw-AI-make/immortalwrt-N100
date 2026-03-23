@@ -11,3 +11,10 @@ sed -i "s/hostname='ImmortalWrt'/hostname='ImmortalWrt-x86'/g" package/base-file
 if [ -f package/luci-app-adguardhome/Makefile ]; then
   sed -ri '/^LUCI_DEPENDS:=/s#\+(ca-certs|wget-ssl)##g' package/luci-app-adguardhome/Makefile || true
 fi
+
+# 用 packages master 的 frp Makefile 覆盖旧版 0.51.3
+if [ -f feeds/packages/net/frp/Makefile ]; then
+  curl -L \
+    https://raw.githubusercontent.com/openwrt/packages/master/net/frp/Makefile \
+    -o feeds/packages/net/frp/Makefile
+fi
