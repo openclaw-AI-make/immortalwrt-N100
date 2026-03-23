@@ -46,7 +46,7 @@ jobs:
         run: |
           git clone --depth 1 -b $REPO_BRANCH $REPO_URL openwrt
 
-      - name: Add custom feeds
+      - name: Add custom packages
         run: |
           cd openwrt
           chmod +x ../$DIY_P1_SH
@@ -80,7 +80,7 @@ jobs:
           mkdir -p .ccache
           echo "CCACHE_DIR=$(pwd)/.ccache" >> $GITHUB_ENV
           echo "CCACHE_BASEDIR=$(pwd)" >> $GITHUB_ENV
-          [ -e ../$CONFIG_FILE ] && cp ../$CONFIG_FILE .config
+          cp ../$CONFIG_FILE .config
           chmod +x ../$DIY_P2_SH
           ../$DIY_P2_SH
           make defconfig
