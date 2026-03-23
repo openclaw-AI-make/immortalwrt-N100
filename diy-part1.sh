@@ -10,7 +10,10 @@ src-git openclash https://github.com/vernesong/OpenClash
 # Turbo ACC
 src-git turboacc https://github.com/chenmozhijin/turboacc.git;luci
 
-# AdGuard Home LuCI - 第三方
+# AdGuard Home LuCI
 src-git adguardhome_luci https://github.com/rufengsuixing/luci-app-adguardhome
-EOF
 
+# Passwall
+src-git passwall_packages https://github.com/Openwrt-Passwall/openwrt-passwall-packages.git;main
+src-git passwall_luci https://github.com/Openwrt-Passwall/openwrt-passwall.git;main
+EOF
