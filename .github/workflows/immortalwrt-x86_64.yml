@@ -123,6 +123,12 @@ jobs:
       - name: Build firmware
         run: |
           cd openwrt
+          # Final nuke: sing-box may be re-symlinked by make download
+          rm -rf package/feeds/packages/sing-box feeds/packages/net/sing-box
+          for pkg in sing-box sing-box-full; do
+            sed -i "s/CONFIG_PACKAGE_${pkg}=y/# CONFIG_PACKAGE_${pkg} is not set/" .config
+            sed -i "s/CONFIG_PACKAGE_${pkg}=m/# CONFIG_PACKAGE_${pkg} is not set/" .config
+          done
           make -j$(nproc) V=s || make -j1 V=s
 
       - name: Show cache stats after build
