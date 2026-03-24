@@ -89,8 +89,19 @@ jobs:
             sed -i "s/CONFIG_PACKAGE_${pkg}=y/# CONFIG_PACKAGE_${pkg} is not set/" .config
             sed -i "s/CONFIG_PACKAGE_${pkg}=m/# CONFIG_PACKAGE_${pkg} is not set/" .config
           done
+          # Nuclear: remove sing-box source so nothing can build it
+          rm -rf package/feeds/packages/sing-box
+          # Re-run defconfig to resolve broken deps cleanly
+          make defconfig
+          # Ensure it stays disabled after second defconfig
+          for pkg in sing-box sing-box-full; do
+            sed -i "s/CONFIG_PACKAGE_${pkg}=y/# CONFIG_PACKAGE_${pkg} is not set/" .config
+            sed -i "s/CONFIG_PACKAGE_${pkg}=m/# CONFIG_PACKAGE_${pkg} is not set/" .config
+          done
           echo "=== sing-box status in final .config ==="
           grep -i sing-box .config || echo "(not found)"
+          echo "=== sing-box package dir ==="
+          ls package/feeds/packages/sing-box 2>/dev/null || echo "(removed)"
 
       - name: Show cache stats before build
         run: |
