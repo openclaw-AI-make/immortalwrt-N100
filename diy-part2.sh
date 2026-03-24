@@ -12,5 +12,5 @@ if [ -f package/luci-app-adguardhome/Makefile ]; then
   sed -ri '/^LUCI_DEPENDS:=/s#\+(ca-certs|wget-ssl)##g' package/luci-app-adguardhome/Makefile || true
 fi
 
-# NOTE: 不再从上游拉最新 frp — 上游 frp 0.66.0 需要 Go>=1.24，
-# 而 ImmortalWrt 24.10 工具链仅提供 Go 1.23.x，直接用 feeds 自带版本即可
+# NOTE: frp 0.66.0 / sing-box 1.12.22 都需要 Go>=1.24，
+# 而 ImmortalWrt 24.10 工具链仅 Go 1.23.x，已在 .config 和 diy-part1 中禁用相关包和 feeds。
