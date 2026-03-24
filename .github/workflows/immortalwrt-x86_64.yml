@@ -84,6 +84,13 @@ jobs:
           chmod +x ../$DIY_P2_SH
           ../$DIY_P2_SH
           make defconfig
+          # Force-disable sing-box after defconfig (dep chain re-enables it)
+          for pkg in sing-box sing-box-full; do
+            sed -i "s/CONFIG_PACKAGE_${pkg}=y/# CONFIG_PACKAGE_${pkg} is not set/" .config
+            sed -i "s/CONFIG_PACKAGE_${pkg}=m/# CONFIG_PACKAGE_${pkg} is not set/" .config
+          done
+          echo "=== sing-box status in final .config ==="
+          grep -i sing-box .config || echo "(not found)"
 
       - name: Show cache stats before build
         run: |
