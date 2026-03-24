@@ -12,8 +12,8 @@ if [ -f package/luci-app-adguardhome/Makefile ]; then
   sed -ri '/^LUCI_DEPENDS:=/s#\+(ca-certs|wget-ssl)##g' package/luci-app-adguardhome/Makefile || true
 fi
 
-# 修正 shadowsocksr-libev 找不到 pcre 库的问题：显式指定 staging 路径
+# 修正 shadowsocksr-libev 找不到 pcre 库的问题：同行追加 --with-pcre
 if [ -f package/helloworld/shadowsocksr-libev/Makefile ]; then
-  sed -i '/--enable-system-shared-lib/a\\t--with-pcre=$(STAGING_DIR)/usr' \
+  sed -i 's|--enable-system-shared-lib|--enable-system-shared-lib --with-pcre=$(STAGING_DIR)/usr|' \
     package/helloworld/shadowsocksr-libev/Makefile
 fi
