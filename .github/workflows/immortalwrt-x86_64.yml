@@ -125,10 +125,20 @@ jobs:
           cd openwrt
           # Final nuke: sing-box may be re-symlinked by make download
           rm -rf package/feeds/packages/sing-box feeds/packages/net/sing-box
+          # Also nuke frp if it crept back
+          rm -rf package/feeds/*/frp feeds/*/net/frp package/frp
+          # Clean tmp cache so make forgets about removed packages
+          rm -rf tmp/info/.packageinfo-*sing-box* tmp/info/.packageinfo-*frp*
+          rm -f tmp/.config-package.in tmp/.packageinfo
           for pkg in sing-box sing-box-full; do
             sed -i "s/CONFIG_PACKAGE_${pkg}=y/# CONFIG_PACKAGE_${pkg} is not set/" .config
             sed -i "s/CONFIG_PACKAGE_${pkg}=m/# CONFIG_PACKAGE_${pkg} is not set/" .config
           done
+          make defconfig
+          # Verify sing-box is truly gone
+          echo "=== sing-box check ==="
+          ls feeds/packages/net/sing-box 2>/dev/null && echo "WARN: sing-box still exists!" || echo "OK: sing-box removed"
+          ls tmp/info/.packageinfo-*sing-box* 2>/dev/null && echo "WARN: sing-box packageinfo cached!" || echo "OK: no sing-box cache"
           make -j$(nproc) V=s || make -j1 V=s
 
       - name: Show cache stats after build
