@@ -10,8 +10,9 @@ git clone --depth=1 -b luci https://github.com/chenmozhijin/turboacc.git package
 # AdGuard Home LuCI
 git clone --depth=1 https://github.com/rufengsuixing/luci-app-adguardhome package/luci-app-adguardhome
 
-# kuoruan/openwrt-frp — prebuilt frpc/frps binaries (no Go compilation needed)
-git clone --depth=1 https://github.com/kuoruan/openwrt-frp.git package/frp
+# kuoruan/openwrt-frp — DISABLED: pion/dtls/v2 Go module broken in frp 0.57.0
+# Re-enable when upstream fixes the dependency issue.
+# git clone --depth=1 https://github.com/kuoruan/openwrt-frp.git package/frp
 
 # fw876/helloworld — SSR Plus+ (mature, stable)
 git clone --depth=1 -b main https://github.com/fw876/helloworld package/helloworld

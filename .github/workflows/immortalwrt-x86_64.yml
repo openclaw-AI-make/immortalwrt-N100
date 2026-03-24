@@ -91,6 +91,8 @@ jobs:
           done
           # Nuclear: remove sing-box source so nothing can build it
           rm -rf package/feeds/packages/sing-box
+          # Nuclear: remove frp source (pion/dtls/v2 Go module broken)
+          rm -rf package/frp package/feeds/*/frp
           # Re-run defconfig to resolve broken deps cleanly
           make defconfig
           # Ensure it stays disabled after second defconfig
