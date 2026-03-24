@@ -90,9 +90,9 @@ jobs:
             sed -i "s/CONFIG_PACKAGE_${pkg}=m/# CONFIG_PACKAGE_${pkg} is not set/" .config
           done
           # Nuclear: remove sing-box source so nothing can build it
-          rm -rf package/feeds/packages/sing-box
+          rm -rf package/feeds/packages/sing-box feeds/packages/net/sing-box
           # Nuclear: remove frp source (pion/dtls/v2 Go module broken)
-          rm -rf package/frp package/feeds/*/frp
+          rm -rf package/frp package/feeds/*/frp feeds/*/net/frp
           # Re-run defconfig to resolve broken deps cleanly
           make defconfig
           # Ensure it stays disabled after second defconfig
@@ -100,10 +100,14 @@ jobs:
             sed -i "s/CONFIG_PACKAGE_${pkg}=y/# CONFIG_PACKAGE_${pkg} is not set/" .config
             sed -i "s/CONFIG_PACKAGE_${pkg}=m/# CONFIG_PACKAGE_${pkg} is not set/" .config
           done
+          # Final nuke: remove again in case defconfig re-created symlinks
+          rm -rf package/feeds/packages/sing-box feeds/packages/net/sing-box
+          rm -rf package/feeds/*/frp feeds/*/net/frp
           echo "=== sing-box status in final .config ==="
           grep -i sing-box .config || echo "(not found)"
           echo "=== sing-box package dir ==="
-          ls package/feeds/packages/sing-box 2>/dev/null || echo "(removed)"
+          ls feeds/packages/net/sing-box 2>/dev/null || echo "(removed)"
+          ls package/feeds/packages/sing-box 2>/dev/null || echo "(symlink removed)"
 
       - name: Show cache stats before build
         run: |
