@@ -37,24 +37,18 @@ jobs:
           tar -I zstd -xf ${IB_NAME}.tar.zst
           mv ${IB_NAME} imagebuilder
 
-      - name: Sync third-party packages from store
+      - name: Download third-party ipk packages
         run: |
-          git clone --depth=1 https://github.com/wukongdaily/store.git /tmp/store
-          mkdir -p imagebuilder/extra-packages
+          cd imagebuilder/packages
           
-          # 复制 Turbo ACC ipk
-          if [ -d /tmp/store/run/x86/luci-app-turboacc ]; then
-            cp -r /tmp/store/run/x86/luci-app-turboacc/*.ipk imagebuilder/packages/ 2>/dev/null || true
-            find /tmp/store/run/x86/luci-app-turboacc -name "*.ipk" -exec cp {} imagebuilder/packages/ \; 2>/dev/null || true
-          fi
+          # AdGuard Home LuCI 界面
+          wget -q "https://github.com/rufengsuixing/luci-app-adguardhome/releases/download/1.8-9/luci-app-adguardhome_1.8-9_all.ipk" && echo "✅ luci-app-adguardhome" || echo "❌ luci-app-adguardhome"
           
-          # 复制 libs (公共依赖)
-          if [ -d /tmp/store/run/x86/libs ]; then
-            find /tmp/store/run/x86/libs -name "*.ipk" -exec cp {} imagebuilder/packages/ \; 2>/dev/null || true
-          fi
+          # Turbo ACC
+          wget -q "https://raw.githubusercontent.com/wukongdaily/store/master/run/x86/luci-app-turboacc/luci-app-turboacc_26.177.43426-f6bddfc_all.ipk" && echo "✅ luci-app-turboacc" || echo "❌ luci-app-turboacc"
           
-          echo "第三方包:"
-          ls imagebuilder/packages/*.ipk 2>/dev/null | tail -20 || echo "无额外 ipk"
+          echo "第三方 ipk:"
+          ls -lh *.ipk 2>/dev/null | grep -E "adguard|turbo" || echo "无"
 
       - name: Configure custom files
         run: |
@@ -69,14 +63,7 @@ jobs:
           mkdir -p files/etc/openclash/core
           META_URL="https://raw.githubusercontent.com/vernesong/OpenClash/core/master/meta/clash-linux-amd64.tar.gz"
           wget -qO- $META_URL | tar xOvz > files/etc/openclash/core/clash_meta 2>/dev/null || true
-          if [ -f files/etc/openclash/core/clash_meta ]; then
-            chmod +x files/etc/openclash/core/clash_meta
-            echo "✅ OpenClash 核心下载成功"
-          else
-            echo "⚠️ OpenClash 核心下载失败，跳过"
-          fi
-          
-          # GeoIP + GeoSite
+          [ -f files/etc/openclash/core/clash_meta ] && chmod +x files/etc/openclash/core/clash_meta && echo "✅ OpenClash core" || echo "⚠️ OpenClash core 下载失败"
           wget -q https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat -O files/etc/openclash/GeoIP.dat 2>/dev/null || true
           wget -q https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat -O files/etc/openclash/GeoSite.dat 2>/dev/null || true
 
