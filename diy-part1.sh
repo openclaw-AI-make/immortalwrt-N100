@@ -15,7 +15,7 @@ git clone --depth=1 https://github.com/rufengsuixing/luci-app-adguardhome packag
 # git clone --depth=1 https://github.com/kuoruan/openwrt-frp.git package/frp
 
 # fw876/helloworld — SSR Plus+ (mature, stable)
-git clone --depth=1 -b main https://github.com/fw876/helloworld package/helloworld
+# git clone --depth=1 -b main https://github.com/fw876/helloworld package/helloworld  # disabled: pcre dep broken package/helloworld
 
 # Passwall feeds — disabled: sing-box 1.12.22 requires Go>=1.24, incompatible
 # Uncomment when upstream fixes the Go version requirement.
