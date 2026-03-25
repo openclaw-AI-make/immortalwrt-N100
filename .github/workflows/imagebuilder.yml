@@ -37,24 +37,60 @@ jobs:
           tar -I zstd -xf ${IB_NAME}.tar.zst
           mv ${IB_NAME} imagebuilder
 
-      - name: Configure Image Builder
+      - name: Sync third-party packages from store
+        run: |
+          git clone --depth=1 https://github.com/wukongdaily/store.git /tmp/store
+          mkdir -p imagebuilder/extra-packages
+          
+          # 复制 Turbo ACC ipk
+          if [ -d /tmp/store/run/x86/luci-app-turboacc ]; then
+            cp -r /tmp/store/run/x86/luci-app-turboacc/*.ipk imagebuilder/packages/ 2>/dev/null || true
+            find /tmp/store/run/x86/luci-app-turboacc -name "*.ipk" -exec cp {} imagebuilder/packages/ \; 2>/dev/null || true
+          fi
+          
+          # 复制 libs (公共依赖)
+          if [ -d /tmp/store/run/x86/libs ]; then
+            find /tmp/store/run/x86/libs -name "*.ipk" -exec cp {} imagebuilder/packages/ \; 2>/dev/null || true
+          fi
+          
+          echo "第三方包:"
+          ls imagebuilder/packages/*.ipk 2>/dev/null | tail -20 || echo "无额外 ipk"
+
+      - name: Configure custom files
         run: |
           cd imagebuilder
           cp -rf $GITHUB_WORKSPACE/files .
           chmod +x $GITHUB_WORKSPACE/scripts/*.sh
           bash $GITHUB_WORKSPACE/scripts/customize.sh
 
+      - name: Download OpenClash core
+        run: |
+          cd imagebuilder
+          mkdir -p files/etc/openclash/core
+          META_URL="https://raw.githubusercontent.com/vernesong/OpenClash/core/master/meta/clash-linux-amd64.tar.gz"
+          wget -qO- $META_URL | tar xOvz > files/etc/openclash/core/clash_meta 2>/dev/null || true
+          if [ -f files/etc/openclash/core/clash_meta ]; then
+            chmod +x files/etc/openclash/core/clash_meta
+            echo "✅ OpenClash 核心下载成功"
+          else
+            echo "⚠️ OpenClash 核心下载失败，跳过"
+          fi
+          
+          # GeoIP + GeoSite
+          wget -q https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat -O files/etc/openclash/GeoIP.dat 2>/dev/null || true
+          wget -q https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat -O files/etc/openclash/GeoSite.dat 2>/dev/null || true
+
       - name: Build firmware
         run: |
           cd imagebuilder
           CONFIG_PACKAGES=$(cat $GITHUB_WORKSPACE/config/packages.config | grep -v '^#' | grep -v '^$' | tr -s "\n" " ")
           echo "安装的包: $CONFIG_PACKAGES"
-          make image PACKAGES="$CONFIG_PACKAGES" FILES="files"
+          make image PROFILE="generic" PACKAGES="$CONFIG_PACKAGES" FILES="files" ROOTFS_PARTSIZE=1024
 
       - name: Prepare artifacts
         run: |
           cd imagebuilder/bin/targets/${{ env.DEVICE_TARGET }}/${{ env.DEVICE_SUBTARGET }}
-          ls -lh
+          ls -lh *.img.gz 2>/dev/null || true
           sha256sum *.img.gz > sha256sums.txt 2>/dev/null || true
 
       - name: Upload firmware
@@ -62,7 +98,6 @@ jobs:
         with:
           name: immortalwrt-x86_64-firmware
           path: |
-            imagebuilder/bin/targets/${{ env.DEVICE_TARGET }}/${{ env.DEVICE_SUBTARGET }}/*ext4-combined-efi.img.gz
-            imagebuilder/bin/targets/${{ env.DEVICE_TARGET }}/${{ env.DEVICE_SUBTARGET }}/*squashfs-combined-efi.img.gz
+            imagebuilder/bin/targets/${{ env.DEVICE_TARGET }}/${{ env.DEVICE_SUBTARGET }}/*combined-efi.img.gz
             imagebuilder/bin/targets/${{ env.DEVICE_TARGET }}/${{ env.DEVICE_SUBTARGET }}/sha256sums.txt
           retention-days: 30
