@@ -45,15 +45,19 @@ jobs:
           MOSDNS_URL="https://downloads.immortalwrt.org/releases/${{ env.IMMORTALWRT_VERSION }}/packages/x86_64/packages/mosdns_5.3.3-r1_x86_64.ipk"
           wget -q "$MOSDNS_URL" && echo "✅ mosdns" || echo "❌ mosdns"
           
-          # AdGuard Home (使用较新的版本)
-          ADGH_URL="https://github.com/AdguardTeam/AdGuardHome/releases/latest/download/AdGuardHome_linux_amd64.tar.gz"
-          wget -q "$ADGH_URL" -O AdGuardHome.tar.gz && tar xzf AdGuardHome.tar.gz && echo "✅ AdGuardHome core" || echo "❌ AdGuardHome"
+          # AdGuard Home 核心 (从官方源下载)
+          ADGH_CORE_URL="https://downloads.immortalwrt.org/releases/${{ env.IMMORTALWRT_VERSION }}/packages/x86_64/packages/adguardhome_0.107.57-r1_x86_64.ipk"
+          wget -q "$ADGH_CORE_URL" && echo "✅ adguardhome core" || echo "❌ adguardhome core"
+          
+          # AdGuard Home LuCI 界面 (使用 stevenjoezhang 的 v1.19)
+          wget -q "https://github.com/stevenjoezhang/luci-app-adguardhome/releases/download/v1.19/luci-app-adguardhome_1.19_all.ipk" && echo "✅ luci-app-adguardhome v1.19" || echo "❌ luci-app-adguardhome"
+          wget -q "https://github.com/stevenjoezhang/luci-app-adguardhome/releases/download/v1.19/luci-i18n-adguardhome-zh-cn_260130.50632_all.ipk" && echo "✅ 中文语言包" || echo "❌ 中文语言包"
           
           # Turbo ACC
           wget -q "https://raw.githubusercontent.com/wukongdaily/store/master/run/x86/luci-app-turboacc/luci-app-turboacc_26.177.43426-f6bddfc_all.ipk" && echo "✅ luci-app-turboacc" || echo "❌ luci-app-turboacc"
           
           echo "=== 下载的包 ==="
-          ls -lh *.ipk AdGuardHome 2>/dev/null || echo "无文件"
+          ls -lh *.ipk 2>/dev/null || echo "无 ipk 文件"
 
       - name: Configure custom files
         run: |
