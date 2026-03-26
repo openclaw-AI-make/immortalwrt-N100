@@ -37,9 +37,13 @@ jobs:
           tar -I zstd -xf ${IB_NAME}.tar.zst
           mv ${IB_NAME} imagebuilder
 
-      - name: Download third-party ipk packages
+      - name: Download packages
         run: |
           cd imagebuilder/packages
+          
+          # MosDNS (从官方源下载)
+          MOSDNS_URL="https://downloads.immortalwrt.org/releases/${{ env.IMMORTALWRT_VERSION }}/packages/x86_64/packages/mosdns_5.3.3-r1_x86_64.ipk"
+          wget -q "$MOSDNS_URL" && echo "✅ mosdns" || echo "❌ mosdns"
           
           # AdGuard Home LuCI 界面
           wget -q "https://github.com/rufengsuixing/luci-app-adguardhome/releases/download/1.8-9/luci-app-adguardhome_1.8-9_all.ipk" && echo "✅ luci-app-adguardhome" || echo "❌ luci-app-adguardhome"
@@ -47,8 +51,8 @@ jobs:
           # Turbo ACC
           wget -q "https://raw.githubusercontent.com/wukongdaily/store/master/run/x86/luci-app-turboacc/luci-app-turboacc_26.177.43426-f6bddfc_all.ipk" && echo "✅ luci-app-turboacc" || echo "❌ luci-app-turboacc"
           
-          echo "第三方 ipk:"
-          ls -lh *.ipk 2>/dev/null | grep -E "adguard|turbo" || echo "无"
+          echo "=== 下载的包 ==="
+          ls -lh *.ipk 2>/dev/null || echo "无 ipk 文件"
 
       - name: Configure custom files
         run: |
@@ -71,8 +75,11 @@ jobs:
         run: |
           cd imagebuilder
           CONFIG_PACKAGES=$(cat $GITHUB_WORKSPACE/config/packages.config | grep -v '^#' | grep -v '^$' | tr -s "\n" " ")
-          echo "安装的包: $CONFIG_PACKAGES"
-          make image PROFILE="generic" PACKAGES="$CONFIG_PACKAGES" FILES="files" ROOTFS_PARTSIZE=1024
+          echo "=== 安装的包 ==="
+          echo "$CONFIG_PACKAGES"
+          echo ""
+          echo "=== 开始编译 ==="
+          make image PROFILE="generic" PACKAGES="$CONFIG_PACKAGES" FILES="files" ROOTFS_PARTSIZE=1024 V=s
 
       - name: Prepare artifacts
         run: |
