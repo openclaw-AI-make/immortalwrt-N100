@@ -41,13 +41,9 @@ jobs:
         run: |
           cd imagebuilder/packages
           
-          # MosDNS 核心 + LuCI
+          # MosDNS 核心
           MOSDNS_URL="https://downloads.immortalwrt.org/releases/${{ env.IMMORTALWRT_VERSION }}/packages/x86_64/packages/mosdns_5.3.3-r1_x86_64.ipk"
           wget -q "$MOSDNS_URL" && echo "✅ mosdns" || echo "❌ mosdns"
-          
-          # MosDNS LuCI 界面
-          LUCI_MOS_URL="https://downloads.immortalwrt.org/releases/${{ env.IMMORTALWRT_VERSION }}/packages/x86_64/luci/luci-app-mosdns_5.3.3-r1_all.ipk"
-          wget -q "$LUCI_MOS_URL" && echo "✅ luci-app-mosdns" || echo "❌ luci-app-mosdns"
           
           # AdGuard Home 核心
           ADGH_CORE_URL="https://downloads.immortalwrt.org/releases/${{ env.IMMORTALWRT_VERSION }}/packages/x86_64/packages/adguardhome_0.107.57-r1_x86_64.ipk"
@@ -96,6 +92,7 @@ jobs:
           if grep -qiE "(error|fail)" build.log; then
             echo "⚠️ 编译警告/错误:"
             grep -iE "(error|fail)" build.log | tail -20
+            exit 1
           fi
 
       - name: Prepare artifacts
