@@ -17,7 +17,39 @@ jobs:
 
     steps:
       - name: Checkout
+
+      - name: Disable geoview (build fails)
+        run: |
+          mkdir -p package/feeds/packages/geoview
+          echo "define Package/geoview
+  TITLE:=GeoView
+  SECTION:=net
+  CATEGORY:=Network
+  DEPENDS:=@BROKEN
+endef
+
+define Build/Compile
+endef
+
+$(eval $(call BuildPackage,geoview))" > package/feeds/packages/geoview/Makefile
+          echo "geoview disabled"
         uses: actions/checkout@v5
+
+      - name: Disable geoview (build fails)
+        run: |
+          mkdir -p package/feeds/packages/geoview
+          echo "define Package/geoview
+  TITLE:=GeoView
+  SECTION:=net
+  CATEGORY:=Network
+  DEPENDS:=@BROKEN
+endef
+
+define Build/Compile
+endef
+
+$(eval $(call BuildPackage,geoview))" > package/feeds/packages/geoview/Makefile
+          echo "geoview disabled"
 
       - name: Free disk space
         run: |
