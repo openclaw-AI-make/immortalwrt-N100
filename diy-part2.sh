@@ -18,13 +18,16 @@ if [ -f package/helloworld/shadowsocksr-libev/Makefile ]; then
     package/helloworld/shadowsocksr-libev/Makefile
 fi
 
-# Passwall 包处理 (在 feeds install 之后执行)
-# 移除 openwrt feeds 自带的冲突包
-rm -rf feeds/packages/net/{geoview,xray-core,v2ray-geodata,sing-box,chinadns-ng,dns2socks,hysteria,ipt2socks,microsocks,naiveproxy,shadowsocks-libev,shadowsocks-rust,shadowsocksr-libev,simple-obfs,tcping,trojan-plus,tuic-client,v2ray-plugin,xray-plugin,shadow-tls} 2>/dev/null || true
+# 处理 v2ray-geodata 冲突
+# Passwall 和 MosDNS 都依赖 v2ray-geodata，只保留一份
+# 如果 MosDNS 已经克隆了 v2ray-geodata，删除 Passwall 的
+if [ -d "package/mosdns/v2ray-geodata" ]; then
+  echo "✅ MosDNS 已包含 v2ray-geodata，删除 Passwall 的重复包"
+  rm -rf package/passwall-packages/net/v2ray-geodata
+fi
 
-# 克隆 Passwall 官方包
-git clone https://github.com/Openwrt-Passwall/openwrt-passwall-packages package/passwall-packages 2>/dev/null || true
-
-# 移除过时的 luci 版本并克隆新版
-rm -rf feeds/luci/applications/luci-app-passwall 2>/dev/null || true
-git clone https://github.com/Openwrt-Passwall/openwrt-passwall package/passwall-luci 2>/dev/null || true
+# 如果手动克隆了 v2ray-geodata，确保 Passwall 不重复
+if [ -d "package/v2ray-geodata" ]; then
+  echo "✅ 检测到独立 v2ray-geodata，删除 Passwall 的重复包"
+  rm -rf package/passwall-packages/net/v2ray-geodata
+fi
