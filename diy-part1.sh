@@ -10,27 +10,12 @@ git clone --depth=1 -b luci https://github.com/chenmozhijin/turboacc.git package
 # AdGuard Home LuCI
 git clone --depth=1 https://github.com/rufengsuixing/luci-app-adguardhome package/luci-app-adguardhome
 
-# 禁用 geoview (编译失败)
-# geoview 是 OpenClash 的可选依赖，但编译经常失败
-mkdir -p package/feeds/packages/geoview
-cat > package/feeds/packages/geoview/Makefile << 'MAKEFILE'
-define Package/geoview
-  SECTION:=net
-  CATEGORY:=Network
-  TITLE:=GeoView (disabled)
-  DEPENDS:=@BROKEN
-endef
+# MosDNS (新增功能)
+git clone https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
 
-define Build/Compile
-endef
+# v2ray-geodata (MosDNS 依赖)
+git clone https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
 
-$(eval $(call BuildPackage,geoview))
-MAKEFILE
-
-# kuoruan/openwrt-frp — DISABLED
-# git clone --depth=1 https://github.com/kuoruan/openwrt-frp.git package/frp
-
-# fw876/helloworld — SSR Plus+ — DISABLED
-# git clone --depth=1 -b main https://github.com/fw876/helloworld package/helloworld
-
-# Passwall feeds — disabled
+# Passwall feeds (恢复 - 之前成功过)
+# 在 feeds.conf.default 顶部添加 Passwall 源
+sed -i '1i src-git passwall_packages https://github.com/Openwrt-Passwall/openwrt-passwall-packages.git;main\nsrc-git passwall_luci https://github.com/Openwrt-Passwall/openwrt-passwall.git;main' feeds.conf.default
