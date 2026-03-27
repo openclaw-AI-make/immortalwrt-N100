@@ -11,9 +11,15 @@ git clone --depth=1 -b luci https://github.com/chenmozhijin/turboacc.git package
 git clone --depth=1 https://github.com/rufengsuixing/luci-app-adguardhome package/luci-app-adguardhome
 
 # MosDNS (新增功能)
-git clone https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
+# 先移除 feeds 中的冲突包
+rm -rf feeds/packages/net/v2ray-geodata 2>/dev/null || true
+rm -rf feeds/packages/lang/golang 2>/dev/null || true
 
-# v2ray-geodata (MosDNS 依赖)
+# 更新 golang 到 1.24 (MosDNS v5 必需)
+git clone https://github.com/sbwml/packages_lang_golang -b 24.x feeds/packages/lang/golang
+
+# 克隆 MosDNS 和 v2ray-geodata
+git clone https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
 git clone https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
 
 # Passwall feeds (恢复 - 之前成功过)
