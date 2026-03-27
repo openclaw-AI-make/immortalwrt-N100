@@ -17,7 +17,7 @@ sed -i '1i src-git passwall_packages https://github.com/Openwrt-Passwall/openwrt
 # MosDNS (新增功能)
 # 注意：v2ray-geodata 由 MosDNS 提供，Passwall 共用
 # 不手动克隆 v2ray-geodata，让 feeds install 处理
-git clone https://github.com/sbwml/luci-app-mosdns -b v5-luci package/mosdns
+git clone https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
 
 # 更新 golang 到 1.24 (MosDNS v5 必需)
 rm -rf feeds/packages/lang/golang
