@@ -93,6 +93,8 @@ jobs:
           rm -rf package/feeds/packages/sing-box feeds/packages/net/sing-box
           # Nuclear: remove frp source (pion/dtls/v2 Go module broken)
           rm -rf package/frp package/feeds/*/frp feeds/*/net/frp
+          # Remove geoview (Rust build broken)
+          rm -rf package/feeds/packages/geoview feeds/packages/net/geoview
           # Re-run defconfig to resolve broken deps cleanly
           make defconfig
           # Ensure it stays disabled after second defconfig
