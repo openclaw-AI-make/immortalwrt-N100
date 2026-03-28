@@ -30,7 +30,7 @@ fi
 
 # MosDNS (新增功能)
 # 注意：v2ray-geodata 由 MosDNS 提供，Passwall 共用
-git clone https://github.com/sbwml/luci-app-mosbnb -b v5 package/mosbnb
+git clone https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
 
 # 更新 golang 到 1.24 (MosDNS v5 必需)
 rm -rf feeds/packages/lang/golang
