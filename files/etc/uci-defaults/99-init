@@ -7,7 +7,7 @@ set system.@system[0].hostname='ImmortalWrt-N100'
 set system.@system[0].timezone='CST-8'
 set system.@system[0].zonename='Asia/Shanghai'
 
-set network.lan.ipaddr='192.168.10.2'
+set network.lan.ipaddr='192.168.10.14'
 set network.lan.netmask='255.255.255.0'
 set network.lan.gateway='192.168.10.1'
 set network.lan.dns='127.0.0.1 223.5.5.5 119.29.29.29'
