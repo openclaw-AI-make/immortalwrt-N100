@@ -1,27 +1,34 @@
 #!/usr/bin/env bash
 set -e
 
-# OpenClash (主力代理)
+# ===== 1) Go 1.24 (MosDNS v5 必需) =====
+rm -rf feeds/packages/lang/golang
+git clone --depth=1 https://github.com/sbwml/packages_lang_golang -b 24.x feeds/packages/lang/golang
+
+# ===== 2) OpenClash (主力代理) =====
 git clone --depth=1 https://github.com/vernesong/OpenClash package/openclash
 
-# v2rayA (备用代理)
-git clone --depth=1 https://github.com/v2rayA/v2rayA-openwrt.git package/v2rayA-openwrt
+# ===== 3) v2rayA (备用代理，用 ImmortalWrt 自带，不单独 clone) =====
+# 注意：v2rayA 在 ImmortalWrt 源码中已存在，依赖 xray-core
 
-# Turbo ACC (网络加速，--no-sfe)
+# ===== 4) Turbo ACC (网络加速，--no-sfe) =====
 git clone --depth=1 -b luci https://github.com/chenmozhijin/turboacc.git package/turboacc
 
-# AdGuard Home LuCI (去广告)
+# ===== 5) AdGuard Home LuCI (去广告) =====
 git clone --depth=1 https://github.com/rufengsuixing/luci-app-adguardhome package/luci-app-adguardhome
 
-# MosDNS v5 (DNS 分流)
-git clone https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
+# ===== 6) MosDNS v5 (DNS 分流，sbwml 源) =====
+git clone --depth=1 https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
 
-# v2ray-geodata (地理数据)
-git clone https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
+# ===== 7) v2ray-geodata (地理数据) =====
+git clone --depth=1 https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
 
-# Go 1.24 (MosDNS v5 必需)
-rm -rf feeds/packages/lang/golang
-git clone https://github.com/sbwml/packages_lang_golang -b 24.x feeds/packages/lang/golang
+# ===== 8) xray-core (从 Passwall 源，兼容 Go 1.24) =====
+git clone --depth=1 https://github.com/Openwrt-Passwall/openwrt-passwall-packages package/passwall-pkgs
 
-# 避免 geodata 冲突
-rm -rf feeds/packages/net/{xray-core,v2ray-core,v2ray-geodata,sing-box} || true
+# ===== 9) frpc (从 kuoruan 源，兼容 Go 1.24) =====
+git clone --depth=1 https://github.com/kuoruan/openwrt-frp.git package/frp
+git clone --depth=1 https://github.com/kuoruan/luci-app-frpc.git package/luci-app-frpc
+
+# ===== 10) 避免 feeds 包冲突 (删除旧版) =====
+rm -rf feeds/packages/net/{xray-core,xray-plugin,v2ray-core,sing-box} || true
