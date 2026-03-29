@@ -30,11 +30,9 @@ git clone --depth=1 https://github.com/Openwrt-Passwall/openwrt-passwall-package
 git clone --depth=1 https://github.com/kuoruan/openwrt-frp.git package/frp
 git clone --depth=1 https://github.com/kuoruan/luci-app-frpc.git package/luci-app-frpc
 
-# ===== 10) sing-box (提供 Go 依赖，即使不启用包) =====
-# 注意：某些包的 Go 编译依赖 github.com/sagernet/sing 模块
-# 从 sbwml 源引入，兼容 Go 1.24
-git clone --depth=1 https://github.com/sbwml/openwrt_helloworld package/helloworld
-
-# ===== 11) 避免 feeds 包冲突 (删除旧版) =====
-# 注意：保留 feeds/packages/net/sing-box 由 helloworld 源提供
-rm -rf feeds/packages/net/{xray-core,xray-plugin,v2ray-core} || true
+# ===== 10) 避免 feeds 包冲突 (删除旧版) =====
+# 移除 helloworld 源：导致 pion/dtls Go 1.24 编译错误
+# 错误：no required module provides package github.com/pion/dtls/v2/...
+# 错误：c.setReadBuffer undefined (type *Conn has no field or method setReadBuffer)
+# 已禁用 sing-box，不需要 helloworld 源
+rm -rf feeds/packages/net/{xray-core,xray-plugin,v2ray-core,sing-box} || true
