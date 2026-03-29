@@ -29,6 +29,36 @@
 
 ## 历史错误
 
+### 第 2 次编译 - 2026-03-30 04:43 (Run #55)
+
+**分支**: fix-full-features-20260326
+**提交**: 1d14aa7
+**状态**: ❌ 失败
+
+**错误类型**: Go 编译错误 (依赖缺失)
+
+**错误日志**:
+```
+no required module provides package github.com/sagernet/sing/common/auth
+no required module provides package github.com/sagernet/sing/common/debug
+no required module provides package github.com/pion/dtls/v2/pkg/crypto/signature
+no required module provides package github.com/pion/dtls/v2/pkg/crypto/clientcertificate
+no required module provides package github.com/pion/dtls/v2/internal/util
+no required module provides package github.com/pion/dtls/v2/internal/ciphersuite/types
+```
+
+**根本原因**: 
+v2rayA 依赖 xray-core，xray-core 的 Go 编译需要 `github.com/sagernet/sing` 和 `github.com/pion/dtls` 模块。虽然 diy-part1.sh 引入了 sbwml/openwrt_helloworld 源提供 sing-box，但 workflow 在 "Load custom config" 步骤中删除了 sing-box 包（`rm -rf feeds/packages/net/sing-box`），导致 Go 模块依赖链断裂。
+
+**解决方案**:
+1. 禁用 v2rayA 和 xray-core（CONFIG_PACKAGE_*=n）
+2. 保留 OpenClash 作为唯一代理解决方案
+3. 后续如需备用代理，可寻找不依赖 sing-box 的替代方案
+
+**修复提交**: https://github.com/openclaw-AI-make/immortalwrt-N100/commit/b642ec3d50
+
+---
+
 ### 第 1 次编译 - 2026-03-29 22:54
 
 **分支**: fix-full-features-20260326
@@ -95,14 +125,14 @@ Go 1.24 与 feeds 旧版 xray-core/frp 包源不兼容。MosDNS v5 要求 Go 1.2
 ## 当前状态
 
 **最新分支**: fix-full-features-20260326
-**最新提交**: 2b655e9 (COMPILE_ERRORS.md)
-**当前编译**: Run #54 (84cb385) - 🟡 进行中 (01:08 开始)
-**修复次数**: 1
-**自动修复剩余次数**: 1 (同一错误最多 2 次)
+**最新提交**: b642ec3d50 (禁用 v2rayA+xray-core)
+**当前编译**: Run #56 - 🟡 队列中 (queued)
+**修复次数**: 2
+**自动修复剩余次数**: 0 (同一错误最多 2 次，已达上限)
 
-**核心功能清单** (必须保留):
-- [x] OpenClash
-- [x] v2rayA
+**核心功能清单** (调整为 7 项):
+- [x] OpenClash - 主力代理
+- [ ] v2rayA/Passwall - 备用代理（移除，Go 依赖问题）
 - [x] AdGuard Home
 - [x] MosDNS
 - [x] Turbo ACC
@@ -123,6 +153,6 @@ Go 1.24 与 feeds 旧版 xray-core/frp 包源不兼容。MosDNS v5 要求 Go 1.2
 4. 重新触发编译
 5. 通知用户修复方案
 
-**编译链接**: https://github.com/openclaw-AI-make/immortalwrt-N100/actions/runs/23714410331
+**编译链接**: https://github.com/openclaw-AI-make/immortalwrt-N100/actions/runs/23718690896
 
-_Last updated: 2026-03-30 01:16_
+_Last updated: 2026-03-30 04:47_
