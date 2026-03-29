@@ -1,22 +1,27 @@
 #!/usr/bin/env bash
 set -e
 
-# OpenClash
+# OpenClash (主力代理)
 git clone --depth=1 https://github.com/vernesong/OpenClash package/openclash
 
-# Turbo ACC
+# v2rayA (备用代理)
+git clone --depth=1 https://github.com/v2rayA/v2rayA-openwrt.git package/v2rayA-openwrt
+
+# Turbo ACC (网络加速，--no-sfe)
 git clone --depth=1 -b luci https://github.com/chenmozhijin/turboacc.git package/turboacc
 
-# AdGuard Home LuCI
+# AdGuard Home LuCI (去广告)
 git clone --depth=1 https://github.com/rufengsuixing/luci-app-adguardhome package/luci-app-adguardhome
 
-# MosDNS (新增功能)
+# MosDNS v5 (DNS 分流)
 git clone https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
 
-# 更新 golang 到 1.24 (MosDNS v5 必需)
+# v2ray-geodata (地理数据)
+git clone https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
+
+# Go 1.24 (MosDNS v5 必需)
 rm -rf feeds/packages/lang/golang
 git clone https://github.com/sbwml/packages_lang_golang -b 24.x feeds/packages/lang/golang
 
-# Passwall feeds
-# 注意：在 openwrt 根目录执行，feeds.conf.default 已存在
-# 此步骤将在 diy-part2.sh 中执行
+# 避免 geodata 冲突
+rm -rf feeds/packages/net/{xray-core,v2ray-core,v2ray-geodata,sing-box} || true
