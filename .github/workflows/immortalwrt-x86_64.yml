@@ -98,6 +98,9 @@ jobs:
           # Remove v2ray-plugin (Go module dependency broken)
           rm -rf package/feeds/packages/v2ray-plugin feeds/packages/net/v2ray-plugin
           rm -rf package/feeds/*/v2ray-plugin
+          # Remove xray-core (Go module github.com/sagernet/sing/common missing)
+          rm -rf package/feeds/packages/xray-core feeds/packages/net/xray-core
+          rm -rf package/feeds/*/xray-core
           # Re-run defconfig to resolve broken deps cleanly
           make defconfig
           # Ensure it stays disabled after second defconfig
@@ -134,8 +137,10 @@ jobs:
           rm -rf package/feeds/*/frp feeds/*/net/frp package/frp
           # Also nuke v2ray-plugin if it crept back
           rm -rf package/feeds/*/v2ray-plugin feeds/packages/net/v2ray-plugin
+          # Also nuke xray-core if it crept back
+          rm -rf package/feeds/*/xray-core feeds/packages/net/xray-core
           # Clean tmp cache so make forgets about removed packages
-          rm -rf tmp/info/.packageinfo-*sing-box* tmp/info/.packageinfo-*frp* tmp/info/.packageinfo-*v2ray-plugin*
+          rm -rf tmp/info/.packageinfo-*sing-box* tmp/info/.packageinfo-*frp* tmp/info/.packageinfo-*v2ray-plugin* tmp/info/.packageinfo-*xray-core*
           rm -f tmp/.config-package.in tmp/.packageinfo
           for pkg in sing-box sing-box-full; do
             sed -i "s/CONFIG_PACKAGE_${pkg}=y/# CONFIG_PACKAGE_${pkg} is not set/" .config
