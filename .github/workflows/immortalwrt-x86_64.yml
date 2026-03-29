@@ -91,8 +91,6 @@ jobs:
           done
           # Nuclear: remove sing-box source so nothing can build it
           rm -rf package/feeds/packages/sing-box feeds/packages/net/sing-box
-          # Nuclear: remove frp source (pion/dtls/v2 Go module broken)
-          rm -rf package/frp package/feeds/*/frp feeds/*/net/frp
           # Remove geoview (Rust build broken)
           rm -rf package/feeds/packages/geoview feeds/packages/net/geoview
           # Remove v2ray-plugin (Go module dependency broken)
@@ -101,6 +99,8 @@ jobs:
           # Remove xray-core (Go module github.com/sagernet/sing/common missing)
           rm -rf package/feeds/packages/xray-core feeds/packages/net/xray-core
           rm -rf package/feeds/*/xray-core
+          # Remove mosdns (requires Go 1.25+, runner has Go 1.23)
+          rm -rf package/mosdns feeds/packages/net/mosdns
           # Re-run defconfig to resolve broken deps cleanly
           make defconfig
           # Ensure it stays disabled after second defconfig
@@ -110,7 +110,6 @@ jobs:
           done
           # Final nuke: remove again in case defconfig re-created symlinks
           rm -rf package/feeds/packages/sing-box feeds/packages/net/sing-box
-          rm -rf package/feeds/*/frp feeds/*/net/frp
           echo "=== sing-box status in final .config ==="
           grep -i sing-box .config || echo "(not found)"
           echo "=== sing-box package dir ==="
@@ -133,14 +132,14 @@ jobs:
           cd openwrt
           # Final nuke: sing-box may be re-symlinked by make download
           rm -rf package/feeds/packages/sing-box feeds/packages/net/sing-box
-          # Also nuke frp if it crept back
-          rm -rf package/feeds/*/frp feeds/*/net/frp package/frp
           # Also nuke v2ray-plugin if it crept back
           rm -rf package/feeds/*/v2ray-plugin feeds/packages/net/v2ray-plugin
           # Also nuke xray-core if it crept back
           rm -rf package/feeds/*/xray-core feeds/packages/net/xray-core
+          # Also nuke mosdns if it crept back
+          rm -rf package/mosdns feeds/packages/net/mosdns
           # Clean tmp cache so make forgets about removed packages
-          rm -rf tmp/info/.packageinfo-*sing-box* tmp/info/.packageinfo-*frp* tmp/info/.packageinfo-*v2ray-plugin* tmp/info/.packageinfo-*xray-core*
+          rm -rf tmp/info/.packageinfo-*sing-box* tmp/info/.packageinfo-*v2ray-plugin* tmp/info/.packageinfo-*xray-core* tmp/info/.packageinfo-*mosdns*
           rm -f tmp/.config-package.in tmp/.packageinfo
           for pkg in sing-box sing-box-full; do
             sed -i "s/CONFIG_PACKAGE_${pkg}=y/# CONFIG_PACKAGE_${pkg} is not set/" .config
