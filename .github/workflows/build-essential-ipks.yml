@@ -3,6 +3,8 @@ name: Build Essential IPKs
 on:
   workflow_dispatch:
   push:
+    branches:
+      - full-features-v2
     paths:
       - '.github/workflows/build-essential-ipks.yml'
 
