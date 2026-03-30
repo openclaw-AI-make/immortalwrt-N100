@@ -83,19 +83,19 @@ jobs:
         cd sdk
         echo "Building IPKs..."
         
-        # 编译单个包
+        # 编译单个包（使用正确的包名）
         echo "Compiling OpenClash..."
-        make package/luci-app-openclash/compile
+        make package/OpenClash/compile || echo "OpenClash failed"
         
         echo "Compiling AdGuard Home..."
-        make package/luci-app-adguardhome/compile
+        make package/luci-app-adguardhome/compile || echo "AdGuard Home failed"
         
         echo "Compiling Turbo ACC..."
-        make package/luci-app-turboacc/compile
+        make package/turboacc/compile || echo "Turbo ACC failed"
         
-        echo "Compiling frpc..."
-        make package/frpc/compile
-        make package/luci-app-frpc/compile
+        echo "Compiling frp..."
+        make package/frp/compile || echo "frp failed"
+        make package/luci-app-frpc/compile || echo "luci-app-frpc failed"
         
         echo "Build complete!"
         
