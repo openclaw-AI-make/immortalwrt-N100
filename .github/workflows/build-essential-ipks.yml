@@ -83,14 +83,14 @@ jobs:
         cd sdk
         echo "Building IPKs..."
         
-        # 编译单个包（使用正确的包名）
-        echo "Compiling OpenClash..."
-        make package/OpenClash/compile
+        # 编译单个包（使用正确的包名 - 小写）
+        echo "Compiling openclash..."
+        make package/openclash/compile
         
-        echo "Compiling AdGuard Home..."
+        echo "Compiling luci-app-adguardhome..."
         make package/luci-app-adguardhome/compile
         
-        echo "Compiling Turbo ACC..."
+        echo "Compiling turboacc..."
         make package/turboacc/compile
         
         echo "Compiling frp..."
