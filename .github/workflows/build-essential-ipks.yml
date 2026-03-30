@@ -64,19 +64,10 @@ jobs:
     - name: Configure for IPK build
       run: |
         cd sdk
-        echo "Creating .config..."
-        echo "CONFIG_TARGET_x86=y" > .config
-        echo "CONFIG_TARGET_x86_64=y" >> .config
-        echo "CONFIG_PACKAGE_luci-app-openclash=y" >> .config
-        echo "CONFIG_PACKAGE_luci-app-adguardhome=y" >> .config
-        echo "CONFIG_PACKAGE_luci-app-turboacc=y" >> .config
-        echo "CONFIG_PACKAGE_frpc=y" >> .config
-        echo "CONFIG_PACKAGE_luci-app-frpc=y" >> .config
-        echo "CONFIG_PACKAGE_luci-i18n-frpc-zh-cn=y" >> .config
-        echo "CONFIG_ALL_NONSHARED=y" >> .config
-        echo "CONFIG_DEVEL=y" >> .config
-        echo "CONFIG_IB=y" >> .config
-        cat .config
+        echo "Copying .config from repository..."
+        # 使用完整的 .config 文件，而不是手动创建
+        curl -sL "https://raw.githubusercontent.com/openclaw-AI-make/immortalwrt-N100/full-features-v2/.config" > .config
+        cat .config | head -20
     
     - name: Build IPK packages
       run: |
