@@ -1,0 +1,44 @@
+name: Test Plugin Installation
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ master ]
+    paths: ['scripts/plugin-install-test.sh']
+
+jobs:
+  test-plugins:
+    runs-on: ubuntu-22.04
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v5
+    
+    - name: Setup ImmortalWrt SDK
+      run: |
+        # 下载 ImmortalWrt SDK
+        git clone --depth=1 https://github.com/immortalwrt/immortalwrt.git /tmp/immortalwrt
+        cd /tmp/immortalwrt
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+    
+    - name: Test frp package build
+      run: |
+        cd /tmp/immortalwrt
+        git clone --depth=1 https://github.com/kuoruan/openwrt-frp.git package/frp
+        make package/frp/compile V=s || echo "frp compile failed"
+        make package/luci-app-frpc/compile V=s || echo "luci-app-frpc compile failed"
+    
+    - name: Test mosdns package build
+      run: |
+        cd /tmp/immortalwrt
+        git clone --depth=1 https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
+        rm -rf feeds/packages/lang/golang
+        git clone --depth=1 https://github.com/sbwml/packages_lang_golang -b 23.x feeds/packages/lang/golang
+        make package/mosdns/compile V=s || echo "mosdns compile failed"
+    
+    - name: Upload test results
+      uses: actions/upload-artifact@v6
+      with:
+        name: plugin-test-results
+        path: /tmp/immortalwrt/logs/
