@@ -72,11 +72,13 @@ jobs:
     - name: Build IPK packages
       run: |
         cd sdk
-        echo "Building IPKs using 'make target/install'..."
+        echo "Building IPKs..."
         
-        # 这些第三方包需要在 .config 中启用，然后让主编译流程编译
-        # 使用 make target/install 编译所有启用的包
-        make target/install -j$(nproc)
+        # 先更新包索引
+        make package/index
+        
+        # 编译所有启用的包
+        make package/compile -j$(nproc)
         
         echo "Build complete!"
         
