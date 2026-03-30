@@ -102,28 +102,23 @@ jobs:
     - name: Collect IPK files
       run: |
         mkdir -p ipks
-        cd sdk
+        
+        echo "=== Current directory ==="
+        pwd
+        ls -la
         
         echo "=== Searching for IPK files ==="
         # 查找所有 IPK 文件
-        find bin/ -name "*.ipk" -type f 2>/dev/null
+        find . -name "*.ipk" -type f 2>/dev/null | head -20
         
         # 复制到 ipks 目录
         echo "Copying IPKs..."
-        find bin/ -name "*.ipk" -type f -exec cp {} ../ipks/ \; 2>/dev/null
+        find . -name "*.ipk" -type f -exec cp {} ipks/ \; 2>/dev/null
         
-        cd ../ipks
+        cd ipks
         echo "=== IPK Files Found ==="
         ls -lh *.ipk 2>/dev/null || echo "No IPK files found!"
         echo "Total: $(ls *.ipk 2>/dev/null | wc -l) files"
-        
-        # 如果没找到，检查 SDK 目录结构
-        if [ ! -f "*.ipk" ]; then
-          echo "=== Debug: SDK directory structure ==="
-          ls -la ../sdk/bin/ || true
-          ls -la ../sdk/bin/packages/ || true
-          ls -la ../sdk/bin/targets/ || true
-        fi
     
     - name: Upload IPKs
       uses: actions/upload-artifact@v6
