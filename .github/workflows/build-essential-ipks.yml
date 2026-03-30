@@ -103,10 +103,18 @@ jobs:
       run: |
         mkdir -p ipks
         cd sdk
-        echo "Collecting IPKs..."
-        find bin/packages/x86_64/ -name "*.ipk" -type f -exec cp {} ../ipks/ \; 2>/dev/null
+        
+        echo "=== Searching for IPK files ==="
+        # 查找所有 IPK 文件
+        find bin/ -name "*.ipk" -type f 2>/dev/null | head -20
+        
+        # 复制到 ipks 目录
+        echo "Copying IPKs..."
+        find bin/packages/ -name "*.ipk" -type f -exec cp {} ../ipks/ \; 2>/dev/null || true
+        find bin/targets/ -name "*.ipk" -type f -exec cp {} ../ipks/ \; 2>/dev/null || true
+        
         cd ../ipks
-        echo "=== IPK Files ==="
+        echo "=== IPK Files Found ==="
         ls -lh *.ipk 2>/dev/null || echo "No IPK files found!"
         echo "Total: $(ls *.ipk 2>/dev/null | wc -l) files"
     
