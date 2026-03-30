@@ -120,29 +120,28 @@ jobs:
     
     - name: Create README
       run: |
-        cat > ipks/README.md << 'EOF'
-# Essential IPK Packages for ImmortalWrt 24.10.5 x86-64
-
-## Included Packages
-
-- luci-app-openclash (OpenClash)
-- luci-app-adguardhome (AdGuard Home)
-- luci-app-turboacc (Turbo ACC)
-- frpc + luci-app-frpc (FRP Client)
-- luci-i18n-frpc-zh-cn (Chinese language)
-
-## Installation
-
-1. Upload IPKs to router /tmp directory
-2. SSH login: `ssh root@192.168.1.1`
-3. Install: `opkg install /tmp/*.ipk`
-4. Reboot: `reboot`
-
-## Compatibility
-
-- ImmortalWrt 24.10.5 x86-64
-- OpenWrt 24.10.x x86-64
-EOF
+        mkdir -p ipks
+        echo "# Essential IPK Packages for ImmortalWrt 24.10.5 x86-64" > ipks/README.md
+        echo "" >> ipks/README.md
+        echo "## Included Packages" >> ipks/README.md
+        echo "" >> ipks/README.md
+        echo "- luci-app-openclash (OpenClash)" >> ipks/README.md
+        echo "- luci-app-adguardhome (AdGuard Home)" >> ipks/README.md
+        echo "- luci-app-turboacc (Turbo ACC)" >> ipks/README.md
+        echo "- frpc + luci-app-frpc (FRP Client)" >> ipks/README.md
+        echo "- luci-i18n-frpc-zh-cn (Chinese language)" >> ipks/README.md
+        echo "" >> ipks/README.md
+        echo "## Installation" >> ipks/README.md
+        echo "" >> ipks/README.md
+        echo "1. Upload IPKs to router /tmp directory" >> ipks/README.md
+        echo "2. SSH login: ssh root@192.168.1.1" >> ipks/README.md
+        echo "3. Install: opkg install /tmp/*.ipk" >> ipks/README.md
+        echo "4. Reboot: reboot" >> ipks/README.md
+        echo "" >> ipks/README.md
+        echo "## Compatibility" >> ipks/README.md
+        echo "" >> ipks/README.md
+        echo "- ImmortalWrt 24.10.5 x86-64" >> ipks/README.md
+        echo "- OpenWrt 24.10.x x86-64" >> ipks/README.md
         cat ipks/README.md
     
     - name: Upload README
