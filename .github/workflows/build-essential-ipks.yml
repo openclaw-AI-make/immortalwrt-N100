@@ -31,12 +31,14 @@ jobs:
           build-essential ccache curl git libssl-dev python3-distutils \
           rsync unzip wget time
     
-    - name: Clone ImmortalWrt SDK (shallow)
+    - name: Clone ImmortalWrt SDK
       run: |
-        git clone --depth=1 -b openwrt-24.10 https://github.com/immortalwrt/immortalwrt.git sdk
+        echo "Cloning SDK (this takes 5-10 minutes)..."
+        git clone -b openwrt-24.10 https://github.com/immortalwrt/immortalwrt.git sdk
         cd sdk
-        ./scripts/feeds update -a 2>&1 | tail -5
-        ./scripts/feeds install -a 2>&1 | tail -5
+        echo "Updating feeds..."
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
     
     - name: Clone essential packages
       run: |
@@ -80,7 +82,21 @@ EOF
       run: |
         cd sdk
         echo "Building IPKs..."
-        make -j$(nproc) package/index || make -j1 package/index
+        
+        # 编译单个包（更可靠）
+        echo "Compiling OpenClash..."
+        make package/luci-app-openclash/compile V=s || echo "OpenClash failed"
+        
+        echo "Compiling AdGuard Home..."
+        make package/luci-app-adguardhome/compile V=s || echo "AdGuard Home failed"
+        
+        echo "Compiling Turbo ACC..."
+        make package/luci-app-turboacc/compile V=s || echo "Turbo ACC failed"
+        
+        echo "Compiling frpc..."
+        make package/frpc/compile V=s || echo "frpc failed"
+        make package/luci-app-frpc/compile V=s || echo "luci-app-frpc failed"
+        
         echo "Build complete!"
     
     - name: Collect IPK files
