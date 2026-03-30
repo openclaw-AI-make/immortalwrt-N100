@@ -81,21 +81,12 @@ jobs:
     - name: Build IPK packages
       run: |
         cd sdk
-        echo "Building IPKs..."
+        echo "Building IPKs using 'make package/install'..."
         
-        # 编译单个包（使用正确的包名 - 小写）
-        echo "Compiling openclash..."
-        make package/openclash/compile
-        
-        echo "Compiling luci-app-adguardhome..."
-        make package/luci-app-adguardhome/compile
-        
-        echo "Compiling turboacc..."
-        make package/turboacc/compile
-        
-        echo "Compiling frp..."
-        make package/frp/compile
-        make package/luci-app-frpc/compile
+        # 使用 make package/install 编译所有启用的包
+        # 这些包在 .config 中已启用，会自动编译
+        make package/index
+        make -j$(nproc) package/install
         
         echo "Build complete!"
         
