@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -e
 
+# ===== 1) Go 1.23 (sbwml 推荐版本，兼容所有包) =====
+# 注意：不要用 Go 1.24，pion/dtls 等包有兼容性问题
+rm -rf feeds/packages/lang/golang
+git clone --depth=1 https://github.com/sbwml/packages_lang_golang -b 23.x feeds/packages/lang/golang
+
 # OpenClash
 git clone --depth=1 https://github.com/vernesong/OpenClash package/openclash
 
@@ -9,6 +14,10 @@ git clone --depth=1 -b luci https://github.com/chenmozhijin/turboacc.git package
 
 # AdGuard Home LuCI
 git clone --depth=1 https://github.com/rufengsuixing/luci-app-adguardhome package/luci-app-adguardhome
+
+# MosDNS v5 (DNS 分流) - 需要 Go 1.23
+git clone --depth=1 https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
+git clone --depth=1 https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
 
 # kuoruan/openwrt-frp — DISABLED: pion/dtls/v2 Go module broken in frp 0.57.0
 # Re-enable when upstream fixes the dependency issue.
