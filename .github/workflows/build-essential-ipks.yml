@@ -64,19 +64,19 @@ jobs:
     - name: Configure for IPK build
       run: |
         cd sdk
-        cat > .config << 'EOF'
-CONFIG_TARGET_x86=y
-CONFIG_TARGET_x86_64=y
-CONFIG_PACKAGE_luci-app-openclash=y
-CONFIG_PACKAGE_luci-app-adguardhome=y
-CONFIG_PACKAGE_luci-app-turboacc=y
-CONFIG_PACKAGE_frpc=y
-CONFIG_PACKAGE_luci-app-frpc=y
-CONFIG_PACKAGE_luci-i18n-frpc-zh-cn=y
-CONFIG_ALL_NONSHARED=y
-CONFIG_DEVEL=y
-CONFIG_IB=y
-EOF
+        echo "Creating .config..."
+        echo "CONFIG_TARGET_x86=y" > .config
+        echo "CONFIG_TARGET_x86_64=y" >> .config
+        echo "CONFIG_PACKAGE_luci-app-openclash=y" >> .config
+        echo "CONFIG_PACKAGE_luci-app-adguardhome=y" >> .config
+        echo "CONFIG_PACKAGE_luci-app-turboacc=y" >> .config
+        echo "CONFIG_PACKAGE_frpc=y" >> .config
+        echo "CONFIG_PACKAGE_luci-app-frpc=y" >> .config
+        echo "CONFIG_PACKAGE_luci-i18n-frpc-zh-cn=y" >> .config
+        echo "CONFIG_ALL_NONSHARED=y" >> .config
+        echo "CONFIG_DEVEL=y" >> .config
+        echo "CONFIG_IB=y" >> .config
+        cat .config
     
     - name: Build IPK packages
       run: |
