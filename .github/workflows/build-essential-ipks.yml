@@ -106,20 +106,20 @@ jobs:
     - name: Collect IPK files
       run: |
         mkdir -p ipks
+        cd sdk
         
         echo "=== Current directory ==="
         pwd
-        ls -la
         
         echo "=== Searching for IPK files ==="
         # 查找所有 IPK 文件
-        find . -name "*.ipk" -type f 2>/dev/null | head -20
+        find bin/ -name "*.ipk" -type f 2>/dev/null | head -20
         
         # 复制到 ipks 目录
         echo "Copying IPKs..."
-        find . -name "*.ipk" -type f -exec cp {} ipks/ \; 2>/dev/null
+        find bin/ -name "*.ipk" -type f -exec cp {} ../ipks/ \; 2>/dev/null
         
-        cd ipks
+        cd ../ipks
         echo "=== IPK Files Found ==="
         ls -lh *.ipk 2>/dev/null || echo "No IPK files found!"
         echo "Total: $(ls *.ipk 2>/dev/null | wc -l) files"
