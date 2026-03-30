@@ -77,8 +77,21 @@ jobs:
         # 先应用 .config 配置
         make defconfig
         
-        # 编译所有启用的包
-        make package/compile -j$(nproc)
+        # 编译单个包（更可靠）
+        echo "Compiling luci-app-openclash..."
+        make package/luci-app-openclash/compile || echo "openclash failed"
+        
+        echo "Compiling luci-app-adguardhome..."
+        make package/luci-app-adguardhome/compile || echo "adguardhome failed"
+        
+        echo "Compiling turboacc..."
+        make package/turboacc/compile || echo "turboacc failed"
+        
+        echo "Compiling frp..."
+        make package/frp/compile || echo "frp failed"
+        
+        echo "Compiling luci-app-frpc..."
+        make package/luci-app-frpc/compile || echo "luci-app-frpc failed"
         
         echo "Build complete!"
         
