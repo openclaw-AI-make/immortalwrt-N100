@@ -1,0 +1,208 @@
+name: Build Third-party IPKs for ImmortalWrt 24.10.5
+
+on:
+  workflow_dispatch:
+    inputs:
+      immortalwrt_version:
+        description: 'ImmortalWrt Version'
+        required: true
+        default: '24.10.5'
+      target:
+        description: 'Target Platform'
+        required: true
+        default: 'x86-64'
+
+env:
+  IMMORTALWRT_VERSION: ${{ github.event.inputs.immortalwrt_version || '24.10.5' }}
+  TARGET: ${{ github.event.inputs.target || 'x86-64' }}
+
+jobs:
+  build-ipks:
+    runs-on: ubuntu-22.04
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v5
+    
+    - name: Free disk space
+      run: |
+        sudo rm -rf /opt/ghc
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /usr/local/lib/android
+        sudo docker image prune -af || true
+        df -h
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
+          ccache cmake cpio curl device-tree-compiler ecj fastjar flex gawk gettext \
+          gcc-multilib g++-multilib git gperf haveged help2man intltool libc6-dev-i386 \
+          libelf-dev libfuse-dev libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev \
+          libmpfr-dev libncurses5-dev libncursesw5-dev libpython3-dev libreadline-dev \
+          libssl-dev libtool lrzsz mkisofs msmtp nano ninja-build p7zip p7zip-full \
+          patch pkgconf python3 python3-pip python3-ply python3-docutils python3-setuptools \
+          qemu-utils rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl \
+          unzip vim wget xmlto xsltproc xz-utils zlib1g-dev zstd
+    
+    - name: Clone ImmortalWrt SDK
+      run: |
+        git clone --depth=1 -b openwrt-24.10 https://github.com/immortalwrt/immortalwrt.git sdk
+        cd sdk
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+    
+    - name: Clone third-party packages
+      run: |
+        cd sdk
+        
+        # OpenClash (vernesong)
+        git clone --depth=1 https://github.com/vernesong/OpenClash package/openclash
+        
+        # AdGuard Home (rufengsuixing)
+        git clone --depth=1 https://github.com/rufengsuixing/luci-app-adguardhome package/luci-app-adguardhome
+        
+        # Turbo ACC (chenmozhijin)
+        git clone --depth=1 -b luci https://github.com/chenmozhijin/turboacc.git package/turboacc
+        
+        # MosDNS v5 (sbwml) - 需要 Go 1.23
+        rm -rf feeds/packages/lang/golang
+        git clone --depth=1 https://github.com/sbwml/packages_lang_golang -b 23.x feeds/packages/lang/golang
+        git clone --depth=1 https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
+        git clone --depth=1 https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
+        
+        # frpc (kuoruan)
+        git clone --depth=1 https://github.com/kuoruan/openwrt-frp.git package/frp
+        git clone --depth=1 https://github.com/kuoruan/luci-app-frpc.git package/luci-app-frpc
+    
+    - name: Configure for IPK build
+      run: |
+        cd sdk
+        
+        # 创建 .config 只编译插件包
+        cat > .config <<EOF
+CONFIG_TARGET_x86=y
+CONFIG_TARGET_x86_64=y
+CONFIG_PACKAGE_luci-app-openclash=y
+CONFIG_PACKAGE_luci-app-adguardhome=y
+CONFIG_PACKAGE_luci-app-turboacc=y
+CONFIG_PACKAGE_mosdns=y
+CONFIG_PACKAGE_luci-app-mosdns=y
+CONFIG_PACKAGE_v2ray-geoip=y
+CONFIG_PACKAGE_v2ray-geosite=y
+CONFIG_PACKAGE_frpc=y
+CONFIG_PACKAGE_luci-app-frpc=y
+CONFIG_PACKAGE_luci-i18n-frpc-zh-cn=y
+CONFIG_ALL_NONSHARED=y
+CONFIG_DEVEL=y
+CONFIG_IB=y
+EOF
+    
+    - name: Build IPK packages
+      run: |
+        cd sdk
+        make -j$(nproc) V=s || make -j1 V=s
+    
+    - name: Collect IPK files
+      run: |
+        mkdir -p ipks
+        cd sdk
+        find bin/packages/x86_64/ -name "*.ipk" -exec cp {} ../ipks/ \;
+        cd ../ipks
+        ls -lh
+        echo "Total IPKs: $(ls *.ipk | wc -l)"
+    
+    - name: Upload IPKs
+      uses: actions/upload-artifact@v6
+      with:
+        name: immortalwrt-${{ env.IMMORTALWRT_VERSION }}-x86-64-ipks
+        path: ipks/*.ipk
+        retention-days: 30
+    
+    - name: Create installation guide
+      run: |
+        cat > ipks/INSTALL.md << 'EOF'
+# 第三方插件包安装指南
+
+## 适用固件
+- ImmortalWrt 24.10.5 x86-64
+- 或其他基于 OpenWrt 24.10 的固件
+
+## 安装步骤
+
+### 1. 上传 IPK 包到路由器
+```bash
+# 从 GitHub Actions 下载所有 IPK 包
+# 然后上传到路由器 /tmp 目录
+scp *.ipk root@192.168.10.14:/tmp/
+```
+
+### 2. SSH 登录路由器
+```bash
+ssh root@192.168.10.14
+# 密码：password (或你设置的密码)
+```
+
+### 3. 安装插件
+```bash
+# 更新软件源
+opkg update
+
+# 安装 OpenClash
+opkg install /tmp/luci-app-openclash_*.ipk
+
+# 安装 AdGuard Home
+opkg install /tmp/luci-app-adguardhome_*.ipk
+
+# 安装 Turbo ACC
+opkg install /tmp/luci-app-turboacc_*.ipk
+
+# 安装 MosDNS (可选)
+opkg install /tmp/mosdns_*.ipk
+opkg install /tmp/luci-app-mosdns_*.ipk
+opkg install /tmp/v2ray-geoip_*.ipk
+opkg install /tmp/v2ray-geosite_*.ipk
+
+# 安装 frpc (可选)
+opkg install /tmp/frpc_*.ipk
+opkg install /tmp/luci-app-frpc_*.ipk
+opkg install /tmp/luci-i18n-frpc-zh-cn_*.ipk
+```
+
+### 4. 重启 LuCI
+```bash
+/etc/init.d/uhttpd restart
+# 或重启路由器
+reboot
+```
+
+## 插件说明
+
+| 插件 | 用途 | 必装 |
+|------|------|------|
+| OpenClash | 代理客户端 | ✅ |
+| AdGuard Home | DNS 去广告 | ✅ |
+| Turbo ACC | 网络加速 | ✅ |
+| MosDNS | DNS 分流 | ⭐ 推荐 |
+| frpc | 内网穿透 | ⭐ 推荐 |
+
+## 注意事项
+
+1. 安装顺序：先依赖包，后主程序
+2. 如果安装失败，检查固件版本是否匹配
+3. 安装后建议重启 LuCI 或路由器
+
+## 技术支持
+
+- GitHub Issues: https://github.com/openclaw-AI-make/immortalwrt-N100/issues
+- 编译工作流：https://github.com/openclaw-AI-make/immortalwrt-N100/actions/workflows/build-ipks.yml
+EOF
+        cat ipks/INSTALL.md
+    
+    - name: Upload installation guide
+      uses: actions/upload-artifact@v6
+      with:
+        name: immortalwrt-${{ env.IMMORTALWRT_VERSION }}-x86-64-ipks-guide
+        path: ipks/INSTALL.md
+        retention-days: 30
