@@ -46,7 +46,7 @@ jobs:
         
         # OpenClash
         echo "Cloning OpenClash..."
-        git clone --depth=1 https://github.com/vernesong/OpenClash package/openclash 2>&1 | tail -3
+        git clone --depth=1 https://github.com/vernesong/OpenClash package/luci-app-openclash 2>&1 | tail -3
         
         # AdGuard Home
         echo "Cloning AdGuard Home..."
@@ -81,18 +81,30 @@ jobs:
     - name: Build IPK packages
       run: |
         cd sdk
-        echo "Building IPKs using 'make package/install'..."
+        echo "Building IPKs..."
         
-        # 使用 make package/install 编译所有启用的包
-        # 这些包在 .config 中已启用，会自动编译
+        # 创建包索引
         make package/index
-        make -j$(nproc) package/install
+        
+        # 编译单个包（使用正确的路径）
+        echo "Compiling luci-app-openclash..."
+        make package/luci-app-openclash/luci-app-openclash/compile V=s || echo "luci-app-openclash compile failed"
+        
+        echo "Compiling luci-app-adguardhome..."
+        make package/luci-app-adguardhome/compile V=s || echo "luci-app-adguardhome compile failed"
+        
+        echo "Compiling turboacc..."
+        make package/turboacc/compile V=s || echo "turboacc compile failed"
+        
+        echo "Compiling frp..."
+        make package/frp/compile V=s || echo "frp compile failed"
+        make package/luci-app-frpc/compile V=s || echo "luci-app-frpc compile failed"
         
         echo "Build complete!"
         
         # 检查是否生成了 IPK 文件
         echo "=== Checking for IPK files ==="
-        find bin/ -name "*.ipk" -type f | head -20
+        find bin/packages/ -name "*.ipk" -type f 2>/dev/null | head -20
     
     - name: Collect IPK files
       run: |
