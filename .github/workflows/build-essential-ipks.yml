@@ -81,24 +81,11 @@ jobs:
     - name: Build IPK packages
       run: |
         cd sdk
-        echo "Building IPKs..."
+        echo "Building IPKs using 'make target/install'..."
         
-        # 创建包索引
-        make package/index
-        
-        # 编译单个包（使用正确的路径）
-        echo "Compiling luci-app-openclash..."
-        make package/luci-app-openclash/luci-app-openclash/compile V=s || echo "luci-app-openclash compile failed"
-        
-        echo "Compiling luci-app-adguardhome..."
-        make package/luci-app-adguardhome/compile V=s || echo "luci-app-adguardhome compile failed"
-        
-        echo "Compiling turboacc..."
-        make package/turboacc/compile V=s || echo "turboacc compile failed"
-        
-        echo "Compiling frp..."
-        make package/frp/compile V=s || echo "frp compile failed"
-        make package/luci-app-frpc/compile V=s || echo "luci-app-frpc compile failed"
+        # 这些第三方包需要在 .config 中启用，然后让主编译流程编译
+        # 使用 make target/install 编译所有启用的包
+        make target/install -j$(nproc)
         
         echo "Build complete!"
         
