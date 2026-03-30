@@ -28,10 +28,16 @@ if [ -d package/passwall-pkgs/xray-core ]; then
   cp -r package/passwall-pkgs/xray-plugin package/xray-plugin || true
 fi
 
-# ===== 7) 确认 frpc 已正确引入 =====
-if [ -d package/frp ]; then
-  echo "✅ frpc 已从 kuoruan 源引入"
-fi
+# ===== 7) 下载官方 frpc 二进制 (v0.66.0，兼容 OpenWrt) =====
+# 原因：frp 编译依赖 pion/dtls 与 Go 1.24 不兼容
+# 方案：LuCI 前端 + 官方 frpc 二进制
+echo "📥 下载 frpc v0.66.0 二进制..."
+mkdir -p files/usr/bin
+curl -L https://github.com/fatedier/frp/releases/download/v0.66.0/frp_0.66.0_linux_amd64.tar.gz -o /tmp/frp.tar.gz
+tar -xzf /tmp/frp.tar.gz -C /tmp
+cp /tmp/frp_0.66.0_linux_amd64/frpc files/usr/bin/frpc
+chmod 0755 files/usr/bin/frpc
+echo "✅ frpc 二进制已放入 files/usr/bin/frpc"
 
 # ===== 8) 清理冲突包 (确保) =====
 rm -rf feeds/packages/net/{xray-core,xray-plugin,v2ray-core,sing-box} || true
