@@ -112,12 +112,12 @@ jobs:
         pwd
         
         echo "=== Searching for IPK files ==="
-        # 查找所有 IPK 文件
-        find bin/ -name "*.ipk" -type f 2>/dev/null | head -20
+        # IPK 文件在 bin/packages/<arch>/ 目录
+        find bin/packages/ -name "*.ipk" -type f 2>/dev/null | head -20
         
         # 复制到 ipks 目录
         echo "Copying IPKs..."
-        find bin/ -name "*.ipk" -type f -exec cp {} ../ipks/ \; 2>/dev/null
+        find bin/packages/ -name "*.ipk" -type f -exec cp {} ../ipks/ \; 2>/dev/null
         
         cd ../ipks
         echo "=== IPK Files Found ==="
