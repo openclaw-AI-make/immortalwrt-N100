@@ -83,21 +83,25 @@ jobs:
         cd sdk
         echo "Building IPKs..."
         
-        # 编译单个包（更可靠）
+        # 编译单个包
         echo "Compiling OpenClash..."
-        make package/luci-app-openclash/compile V=s || echo "OpenClash failed"
+        make package/luci-app-openclash/compile
         
         echo "Compiling AdGuard Home..."
-        make package/luci-app-adguardhome/compile V=s || echo "AdGuard Home failed"
+        make package/luci-app-adguardhome/compile
         
         echo "Compiling Turbo ACC..."
-        make package/luci-app-turboacc/compile V=s || echo "Turbo ACC failed"
+        make package/luci-app-turboacc/compile
         
         echo "Compiling frpc..."
-        make package/frpc/compile V=s || echo "frpc failed"
-        make package/luci-app-frpc/compile V=s || echo "luci-app-frpc failed"
+        make package/frpc/compile
+        make package/luci-app-frpc/compile
         
         echo "Build complete!"
+        
+        # 检查是否生成了 IPK 文件
+        echo "=== Checking for IPK files ==="
+        find bin/ -name "*.ipk" -type f | head -20
     
     - name: Collect IPK files
       run: |
