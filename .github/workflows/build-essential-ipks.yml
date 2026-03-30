@@ -74,8 +74,8 @@ jobs:
         cd sdk
         echo "Building IPKs..."
         
-        # 先更新包索引
-        make package/index
+        # 先应用 .config 配置
+        make defconfig
         
         # 编译所有启用的包
         make package/compile -j$(nproc)
