@@ -85,11 +85,11 @@ jobs:
           
           # Download mihomo cores (optimal solution for OpenClash)
           mkdir -p files/etc/openclash/core
-          wget -qO files/etc/openclash/core/clash.meta https://github.com/MetaCubeX/mihomo/releases/download/v1.18.0/mihomo-linux-amd64-v1.18.0.gz
-          gunzip files/etc/openclash/core/clash.meta
+          wget -qO files/etc/openclash/core/clash.meta.gz https://github.com/MetaCubeX/mihomo/releases/download/v1.18.0/mihomo-linux-amd64-v1.18.0.gz
+          gunzip files/etc/openclash/core/clash.meta.gz
           chmod +x files/etc/openclash/core/clash.meta
-          wget -qO files/etc/openclash/core/clash.meta-alpha https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/mihomo-linux-amd64-1.18.0-alpha.gz
-          gunzip files/etc/openclash/core/clash.meta-alpha
+          wget -qO files/etc/openclash/core/clash.meta-alpha.gz https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/mihomo-linux-amd64-1.18.0-alpha.gz
+          gunzip files/etc/openclash/core/clash.meta-alpha.gz
           chmod +x files/etc/openclash/core/clash.meta-alpha
           
           # Generate config if not exists
