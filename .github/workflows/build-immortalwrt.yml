@@ -73,10 +73,7 @@ jobs:
           
           cd immortalwrt
           
-          # Copy custom feeds
-          [ -f ${{ env.FEEDS_CONF }} ] && cp -f ${{ env.FEEDS_CONF }} feeds.conf.default
-          
-          # Update feeds
+          # Update feeds (use default feeds from immortalwrt)
           ./scripts/feeds update -a
           ./scripts/feeds install -a
           
