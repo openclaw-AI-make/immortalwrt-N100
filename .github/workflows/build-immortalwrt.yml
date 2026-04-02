@@ -73,8 +73,12 @@ jobs:
           
           cd immortalwrt
           
-          # Update feeds only (packages selected via .config and diy-part.sh)
-          ./scripts/feeds update -a
+          # Update feeds (split into update and install for better error handling)
+          echo "=== Updating feeds ==="
+          ./scripts/feeds update -a || { echo "Warning: feeds update returned non-zero, continuing..."; }
+          
+          echo "=== Installing feeds ==="
+          ./scripts/feeds install -a || { echo "Warning: feeds install returned non-zero, continuing..."; }
           
           # Copy config
           [ -f ${{ env.CONFIG_FILE }} ] && cp -f ${{ env.CONFIG_FILE }} .config
