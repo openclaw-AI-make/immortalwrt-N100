@@ -64,12 +64,14 @@ jobs:
           key: immortalwrt-${{ github.sha }}
           restore-keys: |
             immortalwrt-
-
       - name: Clone Source
+        id: clone
         run: |
+          set +e  # Disable exit on error
+          
           git clone --depth 1 --single-branch \
-            -b ${{ github.event.inputs.branch }} \
-            ${{ env.REPO_URL }} immortalwrt
+            -b openwrt-23.05 \
+            https://github.com/immortalwrt/immortalwrt immortalwrt
           
           cd immortalwrt
           
@@ -80,7 +82,8 @@ jobs:
           
           # Update feeds (problematic feeds excluded)
           echo "=== Updating feeds ==="
-          ./scripts/feeds update -a || true
+          ./scripts/feeds update -a
+          echo "Feeds update exit code: $?"
           
           # Copy config
           [ -f ${{ env.CONFIG_FILE }} ] && cp -f ${{ env.CONFIG_FILE }} .config
