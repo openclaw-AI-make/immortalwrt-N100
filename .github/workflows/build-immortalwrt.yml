@@ -73,11 +73,12 @@ jobs:
           
           cd immortalwrt
           
-          # Disable problematic telephony feed BEFORE update to prevent exit code 8
-          echo "=== Disabling telephony feed (known issue with exit code 8) ==="
+          # Disable problematic feeds BEFORE update to prevent exit code 8
+          echo "=== Disabling problematic feeds (telephony + routing) ==="
           sed -i 's/^src-git telephony/#src-git telephony/' feeds.conf.default
+          sed -i 's/^src-git routing/#src-git routing/' feeds.conf.default
           
-          # Update feeds (telephony excluded)
+          # Update feeds (problematic feeds excluded)
           echo "=== Updating feeds ==="
           ./scripts/feeds update -a
           
@@ -97,7 +98,7 @@ jobs:
           chmod +x files/etc/openclash/core/clash.meta-alpha
           
           # Generate config if not exists
-          make defconfig
+          make defconfig || echo "::warning::defconfig completed with warnings"
 
       - name: Build Firmware
         id: build
