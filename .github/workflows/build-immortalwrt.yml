@@ -80,7 +80,7 @@ jobs:
           
           # Update feeds (problematic feeds excluded)
           echo "=== Updating feeds ==="
-          ./scripts/feeds update -a
+          ./scripts/feeds update -a || echo "::warning::feeds update completed with warnings (exit code $?)"
           
           # Copy config
           [ -f ${{ env.CONFIG_FILE }} ] && cp -f ${{ env.CONFIG_FILE }} .config
