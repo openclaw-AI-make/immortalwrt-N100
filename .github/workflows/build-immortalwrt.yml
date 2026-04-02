@@ -73,13 +73,12 @@ jobs:
           
           cd immortalwrt
           
-          # Update feeds only (config-driven package selection, no install -a)
-          echo "=== Updating feeds ==="
-          ./scripts/feeds update -a
-          
-          # Disable problematic telephony feed to prevent exit code 8 during defconfig
+          # Disable problematic telephony feed BEFORE update to prevent exit code 8
           echo "=== Disabling telephony feed (known issue with exit code 8) ==="
           sed -i 's/^src-git telephony/#src-git telephony/' feeds.conf.default
+          
+          # Update feeds (telephony excluded)
+          echo "=== Updating feeds ==="
           ./scripts/feeds update -a
           
           # Copy config
