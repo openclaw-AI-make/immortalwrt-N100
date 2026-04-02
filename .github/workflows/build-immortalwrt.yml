@@ -73,12 +73,9 @@ jobs:
           
           cd immortalwrt
           
-          # Update feeds (split into update and install for better error handling)
+          # Update feeds only (config-driven package selection, no install -a)
           echo "=== Updating feeds ==="
-          ./scripts/feeds update -a || { echo "Warning: feeds update returned non-zero, continuing..."; }
-          
-          echo "=== Installing feeds ==="
-          ./scripts/feeds install -a || { echo "Warning: feeds install returned non-zero, continuing..."; }
+          ./scripts/feeds update -a
           
           # Copy config
           [ -f ${{ env.CONFIG_FILE }} ] && cp -f ${{ env.CONFIG_FILE }} .config
