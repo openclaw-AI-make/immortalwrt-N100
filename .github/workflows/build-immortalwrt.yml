@@ -73,9 +73,8 @@ jobs:
           
           cd immortalwrt
           
-          # Update feeds (use default feeds from immortalwrt)
+          # Update feeds only (packages selected via .config and diy-part.sh)
           ./scripts/feeds update -a
-          ./scripts/feeds install -a
           
           # Copy config
           [ -f ${{ env.CONFIG_FILE }} ] && cp -f ${{ env.CONFIG_FILE }} .config
