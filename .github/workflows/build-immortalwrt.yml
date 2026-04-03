@@ -67,8 +67,6 @@ jobs:
       - name: Clone Source
         id: clone
         run: |
-          set +e  # Disable exit on error
-          
           git clone --depth 1 --single-branch \
             -b openwrt-23.05 \
             https://github.com/immortalwrt/immortalwrt immortalwrt
@@ -80,33 +78,33 @@ jobs:
           sed -i 's/^src-git telephony/#src-git telephony/' feeds.conf.default
           sed -i 's/^src-git routing/#src-git routing/' feeds.conf.default
           
-          # Update feeds (problematic feeds excluded)
+          # Update feeds (problematic feeds excluded) - use || true to ignore exit code 8
           echo "=== Updating feeds ==="
-          ./scripts/feeds update -a
-          FEEDS_EXIT_CODE=$?
-          echo "Feeds update exit code: $FEEDS_EXIT_CODE"
+          ./scripts/feeds update -a || true
+          
+          # Install all feeds - use || true to ignore exit code 8
+          echo "=== Installing feeds ==="
+          ./scripts/feeds install -a || true
           
           # Copy config
-          [ -f ${{ env.CONFIG_FILE }} ] && cp -f ${{ env.CONFIG_FILE }} .config
+          [ -f ${{ env.CONFIG_FILE }} ] && cp -f ${{ env.CONFIG_FILE }} .config || true
           
           # Run customization script
-          [ -f ${{ env.DIY_SH }} ] && bash ${{ env.DIY_SH }}
+          [ -f ${{ env.DIY_SH }} ] && bash ${{ env.DIY_SH }} || true
           
           # Download mihomo cores (optimal solution for OpenClash)
           mkdir -p files/etc/openclash/core
-          wget -qO files/etc/openclash/core/clash.meta.gz https://github.com/MetaCubeX/mihomo/releases/download/v1.18.0/mihomo-linux-amd64-v1.18.0.gz
-          gunzip files/etc/openclash/core/clash.meta.gz
-          chmod +x files/etc/openclash/core/clash.meta
-          wget -qO files/etc/openclash/core/clash.meta-alpha.gz https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/mihomo-linux-amd64-1.18.0-alpha.gz
-          gunzip files/etc/openclash/core/clash.meta-alpha.gz
-          chmod +x files/etc/openclash/core/clash.meta-alpha
+          wget -qO files/etc/openclash/core/clash.meta.gz https://github.com/MetaCubeX/mihomo/releases/download/v1.18.0/mihomo-linux-amd64-v1.18.0.gz || true
+          gunzip files/etc/openclash/core/clash.meta.gz || true
+          chmod +x files/etc/openclash/core/clash.meta || true
+          wget -qO files/etc/openclash/core/clash.meta-alpha.gz https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/mihomo-linux-amd64-1.18.0-alpha.gz || true
+          gunzip files/etc/openclash/core/clash.meta-alpha.gz || true
+          chmod +x files/etc/openclash/core/clash.meta-alpha || true
           
           # Generate config if not exists
           make defconfig || echo "::warning::defconfig completed with warnings"
           
-          # Force success - feeds update exit code 8 is non-fatal
           echo "=== Clone Source step completed ==="
-          exit 0
 
       - name: Build Firmware
         id: build
