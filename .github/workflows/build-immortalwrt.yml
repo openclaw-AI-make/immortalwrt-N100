@@ -117,10 +117,17 @@ jobs:
         run: |
           cd immortalwrt
           
-          # First compile host tools (po2lmo, etc.) - required for LuCI apps
+          # First compile host tools - required for LuCI apps
           echo "=== Compiling host tools ==="
           make tools/install
           make toolchain/install
+          
+          # Compile luci-base first to generate po2lmo
+          echo "=== Compiling luci-base (generates po2lmo) ==="
+          make package/luci-base/compile
+          
+          # Verify po2lmo exists
+          ls -la staging_dir/host/bin/po2lmo || echo "Warning: po2lmo not found"
           
           # Add staging_dir/host/bin to PATH so po2lmo is found
           export PATH=$PWD/staging_dir/host/bin:$PATH
