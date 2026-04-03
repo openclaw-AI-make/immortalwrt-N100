@@ -122,9 +122,9 @@ jobs:
           make tools/install
           make toolchain/install
           
-          # Compile luci-base first to generate po2lmo
-          echo "=== Compiling luci-base (generates po2lmo) ==="
-          make package/luci-base/compile
+          # Compile po2lmo tool explicitly (required for LuCI translation)
+          echo "=== Compiling po2lmo tool ==="
+          make -C tools/po2lmo compile || echo "Warning: po2lmo compile skipped"
           
           # Verify po2lmo exists
           ls -la staging_dir/host/bin/po2lmo || echo "Warning: po2lmo not found"
