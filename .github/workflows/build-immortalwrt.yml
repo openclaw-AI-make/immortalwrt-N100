@@ -117,9 +117,18 @@ jobs:
         run: |
           cd immortalwrt
           
-          # First compile luci tools (po2lmo, etc.)
-          echo "=== Compiling LuCI tools ==="
-          make package/luci-base/compile V=s || true
+          # First compile host tools (po2lmo, etc.) - required for LuCI apps
+          echo "=== Compiling host tools ==="
+          make tools/install
+          make toolchain/install
+          
+          # Compile luci-base to generate po2lmo and other LuCI build tools
+          echo "=== Compiling LuCI base ==="
+          make package/luci-base/compile V=s
+          
+          # Add staging_dir/host/bin to PATH so po2lmo is found
+          export PATH=$PWD/staging_dir/host/bin:$PATH
+          echo "PATH updated: $PATH"
           
           # Then compile the full firmware
           echo "=== Building firmware ==="
