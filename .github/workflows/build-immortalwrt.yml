@@ -73,16 +73,10 @@ jobs:
           
           cd immortalwrt
           
-          # Disable problematic feeds BEFORE update to prevent exit code 8
-          echo "=== Disabling problematic feeds (telephony + routing) ==="
-          sed -i 's/^src-git telephony/#src-git telephony/' feeds.conf.default
-          sed -i 's/^src-git routing/#src-git routing/' feeds.conf.default
-          
-          # Update feeds (problematic feeds excluded) - use || true to ignore exit code 8
+          # Update and install feeds - use || true to ignore exit code 8 from conflicts
           echo "=== Updating feeds ==="
           ./scripts/feeds update -a || true
           
-          # Install all feeds - use || true to ignore exit code 8
           echo "=== Installing feeds ==="
           ./scripts/feeds install -a || true
           
