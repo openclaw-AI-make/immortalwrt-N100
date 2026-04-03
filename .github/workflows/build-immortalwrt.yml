@@ -133,7 +133,11 @@ jobs:
             exit 1
           fi
           
-          # Add staging_dir/host/bin to PATH so po2lmo is found
+          # Add staging_dir/host/bin to PATH globally for all subsequent make calls
+          echo "STAGING_DIR=$PWD/staging_dir" >> $GITHUB_ENV
+          echo "$PWD/staging_dir/host/bin" >> $GITHUB_PATH
+          
+          # Also export for current shell
           export PATH=$PWD/staging_dir/host/bin:$PATH
           which po2lmo
           echo "PATH updated: $PATH"
