@@ -122,10 +122,6 @@ jobs:
           make tools/install
           make toolchain/install
           
-          # Compile luci-base to generate po2lmo and other LuCI build tools
-          echo "=== Compiling LuCI base ==="
-          make package/luci-base/compile V=s
-          
           # Add staging_dir/host/bin to PATH so po2lmo is found
           export PATH=$PWD/staging_dir/host/bin:$PATH
           echo "PATH updated: $PATH"
