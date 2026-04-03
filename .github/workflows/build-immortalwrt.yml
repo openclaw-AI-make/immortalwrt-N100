@@ -73,18 +73,24 @@ jobs:
           
           cd immortalwrt
           
-          # Update and install feeds - use || true to ignore exit code 8 from conflicts
+          # Copy DIY script first (before feeds)
+          cp -f ../${{ env.DIY_SH }} ./
+          
+          # Run customization script FIRST to clone packages
+          echo "=== Running DIY script (clone packages) ==="
+          bash ./diy-part.sh
+          
+          # Update feeds only (DO NOT install -a to avoid conflicts)
           echo "=== Updating feeds ==="
           ./scripts/feeds update -a || true
           
-          echo "=== Installing feeds ==="
-          ./scripts/feeds install -a || true
+          # Copy config AFTER packages are cloned
+          echo "=== Copying config ==="
+          cp -f ../${{ env.CONFIG_FILE }} .config
           
-          # Copy config
-          [ -f ${{ env.CONFIG_FILE }} ] && cp -f ${{ env.CONFIG_FILE }} .config || true
-          
-          # Run customization script
-          [ -f ${{ env.DIY_SH }} ] && bash ${{ env.DIY_SH }} || true
+          # Generate config to resolve package dependencies
+          echo "=== Generating final config ==="
+          make defconfig || echo "::warning::defconfig completed with warnings"
           
           # Download mihomo cores (optimal solution for OpenClash)
           mkdir -p files/etc/openclash/core
@@ -95,12 +101,7 @@ jobs:
           gunzip files/etc/openclash/core/clash.meta-alpha.gz || true
           chmod +x files/etc/openclash/core/clash.meta-alpha || true
           
-          # Generate config if not exists
-          make defconfig || echo "::warning::defconfig completed with warnings"
-          
           echo "=== Clone Source step completed ==="
-          
-          # Force success - feeds update/install may return exit code 8 due to conflicts
           exit 0
 
       - name: Build Firmware
