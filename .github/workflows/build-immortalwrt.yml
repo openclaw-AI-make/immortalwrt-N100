@@ -1,6 +1,14 @@
 name: Build ImmortalWrt
 
 on:
+  push:
+    branches:
+      - master
+    paths:
+      - '.config'
+      - 'diy-part.sh'
+      - 'feeds.conf.default'
+      - '.github/workflows/build-immortalwrt.yml'
   workflow_dispatch:
     inputs:
       branch:
