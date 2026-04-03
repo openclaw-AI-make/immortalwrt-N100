@@ -116,6 +116,13 @@ jobs:
         id: build
         run: |
           cd immortalwrt
+          
+          # First compile luci tools (po2lmo, etc.)
+          echo "=== Compiling LuCI tools ==="
+          make package/luci-base/compile V=s || true
+          
+          # Then compile the full firmware
+          echo "=== Building firmware ==="
           make -j$(nproc) || make -j1 V=s
           echo "status=success" >> $GITHUB_OUTPUT
 
