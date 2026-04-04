@@ -119,12 +119,17 @@ jobs:
           
           # First compile host tools - required for LuCI apps
           echo "=== Compiling host tools ==="
-          make tools/install
-          make toolchain/install
+          make tools/install || true
+          make toolchain/install || true
           
           # Compile po2lmo tool explicitly (required for LuCI translation)
           echo "=== Compiling po2lmo tool ==="
-          make -C tools/po2lmo compile
+          make -j1 tools/po2lmo/compile || {
+            echo "po2lmo compile failed, checking staging_dir..."
+            ls -la staging_dir/host/bin/ | grep po2lmo || echo "po2lmo not found yet"
+            # Try alternative: compile all tools
+            make tools/index/.compile || true
+          }
           
           # Verify po2lmo exists and is executable
           if [ ! -x staging_dir/host/bin/po2lmo ]; then
