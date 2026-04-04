@@ -117,18 +117,9 @@ jobs:
         run: |
           cd immortalwrt
           
-          # Compile tools (includes po2lmo)
-          echo "=== Compiling tools (includes po2lmo) ==="
+          # Compile tools (required for firmware build)
+          echo "=== Compiling tools ==="
           make -j1 tools/install V=s
-          
-          # Verify po2lmo exists
-          echo "=== Verifying po2lmo ==="
-          if [ -x staging_dir/host/bin/po2lmo ]; then
-            echo "po2lmo found successfully"
-          else
-            echo "ERROR: po2lmo not found after tools/install"
-            exit 1
-          fi
           
           # Then compile toolchain (after tools complete)
           echo "=== Compiling toolchain ==="
@@ -140,10 +131,9 @@ jobs:
           
           # Also export for current shell
           export PATH=$PWD/staging_dir/host/bin:$PATH
-          which po2lmo
           echo "PATH updated: $PATH"
           
-          # Then compile the full firmware
+          # Then compile the full firmware (includes po2lmo and all packages)
           echo "=== Building firmware ==="
           make -j$(nproc) || make -j1 V=s
           echo "status=success" >> $GITHUB_OUTPUT
