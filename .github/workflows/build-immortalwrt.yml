@@ -117,26 +117,22 @@ jobs:
         run: |
           cd immortalwrt
           
-          # First compile host tools - required for LuCI apps
+          # First compile host tools - required for LuCI apps (NO || true - must complete)
           echo "=== Compiling host tools ==="
-          make tools/install || true
-          make toolchain/install || true
+          make tools/install
           
-          # Compile po2lmo tool explicitly (required for LuCI translation)
-          echo "=== Compiling po2lmo tool ==="
-          make -j1 tools/po2lmo/compile || {
-            echo "po2lmo compile failed, checking staging_dir..."
-            ls -la staging_dir/host/bin/ | grep po2lmo || echo "po2lmo not found yet"
-            # Try alternative: compile all tools
-            make tools/index/.compile || true
-          }
-          
-          # Verify po2lmo exists and is executable
-          if [ ! -x staging_dir/host/bin/po2lmo ]; then
-            echo "::error::po2lmo not found in staging_dir/host/bin/"
-            ls -la staging_dir/host/bin/ || true
-            exit 1
+          # Verify po2lmo exists after tools/install (it should be included)
+          echo "=== Verifying po2lmo ==="
+          if [ -x staging_dir/host/bin/po2lmo ]; then
+            echo "po2lmo found after tools/install"
+          else
+            echo "po2lmo not found, compiling separately..."
+            make tools/po2lmo/compile
           fi
+          
+          # Then compile toolchain (after tools complete)
+          echo "=== Compiling toolchain ==="
+          make toolchain/install
           
           # Add staging_dir/host/bin to PATH globally for all subsequent make calls
           echo "STAGING_DIR=$PWD/staging_dir" >> $GITHUB_ENV
