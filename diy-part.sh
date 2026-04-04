@@ -22,10 +22,10 @@ git_clone() {
 git_clone https://github.com/vernesong/OpenClash.git openclash master
 
 # AdGuard Home
-git_clone https://github.com/rufengsuixing/luci-app-adguardhome.git luci-app-adguardhome main
+git_clone https://github.com/rufengsuixing/luci-app-adguardhome.git luci-app-adguardhome master
 
 # MosDNS v5
-git_clone https://github.com/sbwml/luci-app-mosdns.git package/mosdns v5-latest
+git_clone https://github.com/sbwml/luci-app-mosdns.git package/mosdns v5
 
 # WireGuard
 git_clone https://github.com/coolsnowwolf/luci-app-wireguard.git luci-app-wireguard master
