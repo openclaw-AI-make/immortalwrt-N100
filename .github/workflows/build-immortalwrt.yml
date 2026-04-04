@@ -117,22 +117,18 @@ jobs:
         run: |
           cd immortalwrt
           
-          # FIRST: Compile po2lmo explicitly (required for all LuCI i18n)
-          echo "=== Compiling po2lmo first ==="
-          make -j1 tools/po2lmo/compile V=s
+          # Compile tools (includes po2lmo)
+          echo "=== Compiling tools (includes po2lmo) ==="
+          make -j1 tools/install V=s
           
           # Verify po2lmo exists
           echo "=== Verifying po2lmo ==="
           if [ -x staging_dir/host/bin/po2lmo ]; then
             echo "po2lmo found successfully"
           else
-            echo "ERROR: po2lmo compilation failed"
+            echo "ERROR: po2lmo not found after tools/install"
             exit 1
           fi
-          
-          # THEN: Compile remaining host tools (required for LuCI apps)
-          echo "=== Compiling remaining host tools ==="
-          make -j1 tools/install V=s
           
           # Then compile toolchain (after tools complete)
           echo "=== Compiling toolchain ==="
