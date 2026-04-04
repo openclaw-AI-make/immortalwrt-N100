@@ -114,21 +114,7 @@ jobs:
 
       - name: Build Firmware
         id: build
-        run: |
-          cd immortalwrt
-          
-          # First compile host tools - required for LuCI apps (NO || true - must complete)
-          echo "=== Compiling host tools ==="
-          make tools/install
-          
-          # Verify po2lmo exists after tools/install (it should be included)
-          echo "=== Verifying po2lmo ==="
-          if [ -x staging_dir/host/bin/po2lmo ]; then
-            echo "po2lmo found after tools/install"
-          else
-            echo "po2lmo not found, compiling separately..."
-            make tools/po2lmo/compile
-          fi
+        run: |\n          cd immortalwrt\n          \n          # FIRST: Compile po2lmo explicitly (required for all LuCI i18n)\n          echo "=== Compiling po2lmo first ==="\n          make -j1 tools/po2lmo/compile V=s\n          \n          # Verify po2lmo exists\n          echo "=== Verifying po2lmo ==="\n          if [ -x staging_dir/host/bin/po2lmo ]; then\n            echo "po2lmo found successfully\"\n          else\n            echo \"ERROR: po2lmo compilation failed\"\n            exit 1\n          fi\n          \n          # THEN: Compile remaining host tools (required for LuCI apps)\n          echo "=== Compiling remaining host tools ==="\n          make -j1 tools/install V=s
           
           # Then compile toolchain (after tools complete)
           echo "=== Compiling toolchain ==="
