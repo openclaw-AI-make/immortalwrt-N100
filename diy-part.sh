@@ -23,7 +23,8 @@ git_clone https://github.com/vernesong/OpenClash.git openclash master
 
 # AdGuard Home
 git_clone https://github.com/rufengsuixing/luci-app-adguardhome.git luci-app-adguardhome master
-# Fix po2lmo dependency - create wrapper script to patch Makefile after tools compile
+# Fix po2lmo dependency - create patch file to make translation optional
+mkdir -p package/luci-app-adguardhome/patches
 cat > package/luci-app-adguardhome/patches/001-fix-po2lmo.patch << 'ADGPATCH'
 --- a/Makefile
 +++ b/Makefile
