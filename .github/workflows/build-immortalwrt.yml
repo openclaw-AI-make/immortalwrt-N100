@@ -100,14 +100,13 @@ jobs:
           echo "=== Generating final config ==="
           make defconfig || echo "::warning::defconfig completed with warnings"
           
-          # Download mihomo cores (optimal solution for OpenClash)
+          # Download mihomo cores (stable version only)
           mkdir -p files/etc/openclash/core
           wget -qO files/etc/openclash/core/clash.meta.gz https://github.com/MetaCubeX/mihomo/releases/download/v1.18.0/mihomo-linux-amd64-v1.18.0.gz || true
-          gunzip files/etc/openclash/core/clash.meta.gz || true
-          chmod +x files/etc/openclash/core/clash.meta || true
-          wget -qO files/etc/openclash/core/clash.meta-alpha.gz https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/mihomo-linux-amd64-1.18.0-alpha.gz || true
-          gunzip files/etc/openclash/core/clash.meta-alpha.gz || true
-          chmod +x files/etc/openclash/core/clash.meta-alpha || true
+          if [ -s files/etc/openclash/core/clash.meta.gz ]; then
+            gunzip files/etc/openclash/core/clash.meta.gz
+            chmod +x files/etc/openclash/core/clash.meta
+          fi
           
           echo "=== Clone Source step completed ==="
           exit 0
