@@ -23,6 +23,23 @@ git_clone https://github.com/vernesong/OpenClash.git openclash master
 
 # AdGuard Home
 git_clone https://github.com/rufengsuixing/luci-app-adguardhome.git luci-app-adguardhome master
+# Fix po2lmo dependency - create wrapper script to patch Makefile after tools compile
+cat > package/luci-app-adguardhome/patches/001-fix-po2lmo.patch << 'ADGPATCH'
+--- a/Makefile
++++ b/Makefile
+@@ -79,7 +79,11 @@ define Package/luci-app-adguardhome/install
+ 	cp -pR ./root/* $(1)/
+ 
+ 	install -d -m0755 $(1)/usr/lib/lua/luci/i18n
+-	po2lmo ./po/zh-cn/AdGuardHome.po $(1)/usr/lib/lua/luci/i18n/AdGuardHome.zh-cn.lmo
++	# Only compile translation if po2lmo is available (may not be ready during early build)
++	if command -v po2lmo >/dev/null 2>&1; then \
++		po2lmo ./po/zh-cn/AdGuardHome.po $(1)/usr/lib/lua/luci/i18n/AdGuardHome.zh-cn.lmo; \
++	fi
+ endef
+ 
+ $(eval $(call BuildPackage,luci-app-adguardhome))
+ADGPATCH
 
 # MosDNS v5
 git_clone https://github.com/sbwml/luci-app-mosdns.git package/mosdns v5
