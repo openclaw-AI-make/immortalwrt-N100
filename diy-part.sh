@@ -20,6 +20,8 @@ git_clone() {
 
 # OpenClash (core package)
 git_clone https://github.com/vernesong/OpenClash.git openclash master
+# Fix po2lmo dependency - make translation optional
+sed -i 's|po2lmo .*/po/zh-cn/openclash\.zh-cn\.po.*|@echo "Skipping po2lmo translation (optional)"|g' package/openclash/luci-app-openclash/Makefile
 
 # AdGuard Home
 git_clone https://github.com/rufengsuixing/luci-app-adguardhome.git luci-app-adguardhome master
