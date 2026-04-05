@@ -20,13 +20,13 @@ git_clone() {
 
 # OpenClash (core package)
 git_clone https://github.com/vernesong/OpenClash.git openclash master
-# Fix po2lmo dependency - make translation optional
-sed -i 's|po2lmo .*/po/zh-cn/openclash\.zh-cn\.po.*|@echo "Skipping po2lmo translation (optional)"|g' package/openclash/luci-app-openclash/Makefile
+# Fix po2lmo dependency - replace any po2lmo command with echo
+sed -i '/po2lmo/s/.*/\t@echo "Skipping po2lmo (optional)"/g' package/openclash/luci-app-openclash/Makefile
 
 # AdGuard Home
 git_clone https://github.com/rufengsuixing/luci-app-adguardhome.git luci-app-adguardhome master
-# Fix po2lmo dependency - directly modify Makefile to make translation optional
-sed -i 's|po2lmo ./po/zh-cn/AdGuardHome.po.*|@echo "Skipping po2lmo translation (optional)"|g' package/luci-app-adguardhome/Makefile
+# Fix po2lmo dependency - replace any po2lmo command with echo
+sed -i '/po2lmo/s/.*/\t@echo "Skipping po2lmo (optional)"/g' package/luci-app-adguardhome/Makefile
 
 # MosDNS v5
 git_clone https://github.com/sbwml/luci-app-mosdns.git package/mosdns v5
