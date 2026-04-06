@@ -75,11 +75,24 @@ jobs:
       - name: Clone Source
         id: clone
         run: |
+          # Use TUNA mirror for more reliable downloads
           git clone --depth 1 --single-branch \
             -b openwrt-23.05 \
             https://github.com/immortalwrt/immortalwrt immortalwrt
           
           cd immortalwrt
+          
+          # Replace download mirrors for better reliability (TUNA + USTC)
+          echo "=== Updating download mirrors ==="
+          cat > dl.conf <<'EOF'
+          CONFIG_KERNEL_GIT_CLONE_URI="https://mirrors.tuna.tsinghua.edu.cn/git"
+          CONFIG_KERNEL_GIT_CLONE_URI_GITHUB="https://mirror.ghproxy.com/https://github.com"
+          EOF
+          
+          # Update package download URLs
+          sed -i 's|github.com/openwrt/archive|mirror.tuna.tsinghua.edu.cn/openwrt/archive|g' include/download.mk 2>/dev/null || true
+          sed -i 's|cdn.kernel.org|mirror.tuna.tsinghua.edu.cn/kernel.org|g' include/download.mk 2>/dev/null || true
+          sed -i 's|git.zx2c4.com|mirror.tuna.tsinghua.edu.cn/git/zx2c4.com|g' include/download.mk 2>/dev/null || true
           
           # Copy DIY script first (before feeds)
           cp -f ../${{ env.DIY_SH }} ./
