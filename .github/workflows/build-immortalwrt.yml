@@ -129,20 +129,19 @@ jobs:
         run: |
           cd immortalwrt
           
-          # Add staging_dir/host/bin to PATH BEFORE tools install
-          # This ensures po2lmo and other tools are available during compilation
-          echo "STAGING_DIR=$PWD/staging_dir" >> $GITHUB_ENV
-          echo "$PWD/staging_dir/host/bin" >> $GITHUB_PATH
-          export PATH=$PWD/staging_dir/host/bin:$PATH
-          echo "PATH: $PATH"
-          
-          # Compile tools first (includes po2lmo)
+          # Compile tools first (includes po2lmo) - this creates staging_dir/host/bin
           echo "=== Compiling tools ==="
-          make -j1 tools/install V=s
+          make -j1 tools/install
           
-          # Verify po2lmo is available
+          # Verify po2lmo is available AFTER tools install
           echo "=== Verifying po2lmo ==="
-          which po2lmo || echo "::warning::po2lmo not found in PATH"
+          if [ -f staging_dir/host/bin/po2lmo ]; then
+            echo "po2lmo found at staging_dir/host/bin/po2lmo"
+            export PATH=$PWD/staging_dir/host/bin:$PATH
+          else
+            echo "::error::po2lmo not found after tools/install"
+            exit 1
+          fi
           
           # Then compile toolchain (after tools complete)
           echo "=== Compiling toolchain ==="
