@@ -129,21 +129,24 @@ jobs:
         run: |
           cd immortalwrt
           
-          # Compile tools (required for firmware build)
+          # Add staging_dir/host/bin to PATH BEFORE tools install
+          # This ensures po2lmo and other tools are available during compilation
+          echo "STAGING_DIR=$PWD/staging_dir" >> $GITHUB_ENV
+          echo "$PWD/staging_dir/host/bin" >> $GITHUB_PATH
+          export PATH=$PWD/staging_dir/host/bin:$PATH
+          echo "PATH: $PATH"
+          
+          # Compile tools first (includes po2lmo)
           echo "=== Compiling tools ==="
           make -j1 tools/install V=s
+          
+          # Verify po2lmo is available
+          echo "=== Verifying po2lmo ==="
+          which po2lmo || echo "::warning::po2lmo not found in PATH"
           
           # Then compile toolchain (after tools complete)
           echo "=== Compiling toolchain ==="
           make toolchain/install
-          
-          # Add staging_dir/host/bin to PATH globally for all subsequent make calls
-          echo "STAGING_DIR=$PWD/staging_dir" >> $GITHUB_ENV
-          echo "$PWD/staging_dir/host/bin" >> $GITHUB_PATH
-          
-          # Also export for current shell
-          export PATH=$PWD/staging_dir/host/bin:$PATH
-          echo "PATH updated: $PATH"
           
           # Then compile the full firmware (includes po2lmo and all packages)
           echo "=== Building firmware ==="
