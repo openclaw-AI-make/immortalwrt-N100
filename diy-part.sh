@@ -20,15 +20,9 @@ git_clone() {
 
 # OpenClash (core package)
 git_clone https://github.com/vernesong/OpenClash.git openclash master
-# Fix po2lmo dependency - comment out po2lmo lines to preserve Makefile syntax
-sed -i 's/^[[:space:]]*\$(call po2lmo/# &/' package/openclash/luci-app-openclash/Makefile
-sed -i 's/^[[:space:]]*po2lmo/# &/' package/openclash/luci-app-openclash/Makefile
 
 # AdGuard Home
 git_clone https://github.com/rufengsuixing/luci-app-adguardhome.git luci-app-adguardhome master
-# Fix po2lmo dependency - comment out po2lmo lines to preserve Makefile syntax
-sed -i 's/^[[:space:]]*\$(call po2lmo/# &/' package/luci-app-adguardhome/Makefile
-sed -i 's/^[[:space:]]*po2lmo/# &/' package/luci-app-adguardhome/Makefile
 
 # MosDNS v5
 git_clone https://github.com/sbwml/luci-app-mosdns.git package/mosdns v5
