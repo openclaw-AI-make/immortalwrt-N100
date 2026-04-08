@@ -129,19 +129,12 @@ jobs:
         run: |
           cd immortalwrt
           
-          # Compile tools first (includes po2lmo) - this creates staging_dir/host/bin
+          # Compile tools first - this creates staging_dir/host/bin
           echo "=== Compiling tools ==="
           make -j1 tools/install
           
-          # Verify po2lmo is available AFTER tools install
-          echo "=== Verifying po2lmo ==="
-          if [ -f staging_dir/host/bin/po2lmo ]; then
-            echo "po2lmo found at staging_dir/host/bin/po2lmo"
-            export PATH=$PWD/staging_dir/host/bin:$PATH
-          else
-            echo "::error::po2lmo not found after tools/install"
-            exit 1
-          fi
+          # Note: po2lmo is in package/utils/luci, compiled during full build
+          # No need to verify it here
           
           # Then compile toolchain (after tools complete)
           echo "=== Compiling toolchain ==="
