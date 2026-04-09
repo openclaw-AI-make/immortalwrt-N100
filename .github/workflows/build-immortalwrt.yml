@@ -133,8 +133,12 @@ jobs:
           echo "=== Compiling tools ==="
           make -j1 tools/install
           
-          # Note: po2lmo is in package/utils/luci, compiled during full build
-          # No need to verify it here
+          # Compile po2lmo BEFORE full build (required by OpenClash and other LuCI apps)
+          echo "=== Compiling po2lmo ==="
+          make -j1 package/utils/luci/compile
+          
+          # Add po2lmo to PATH
+          export PATH=$(pwd)/staging_dir/host/bin:$PATH
           
           # Then compile toolchain (after tools complete)
           echo "=== Compiling toolchain ==="
