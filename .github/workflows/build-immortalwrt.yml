@@ -134,18 +134,11 @@ jobs:
           echo "=== Compiling tools ==="
           make -j1 tools/install
           
-          # Compile po2lmo BEFORE full build (required by OpenClash and other LuCI apps)
-          echo "=== Compiling po2lmo ==="
-          make -j1 package/utils/luci/compile
-          
-          # Add po2lmo to PATH
-          export PATH=$(pwd)/staging_dir/host/bin:$PATH
-          
           # Then compile toolchain (after tools complete)
           echo "=== Compiling toolchain ==="
           make toolchain/install
           
-          # Then compile the full firmware (includes po2lmo and all packages)
+          # Then compile the full firmware (po2lmo is built automatically as part of package/utils/luci)
           echo "=== Building firmware ==="
           make -j$(nproc) || make -j1 V=s
           echo "status=success" >> $GITHUB_OUTPUT
