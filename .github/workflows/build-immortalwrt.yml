@@ -101,9 +101,10 @@ jobs:
           echo "=== Running DIY script (clone packages) ==="
           bash ./diy-part.sh
           
-          # Update feeds only (DO NOT install -a to avoid conflicts)
+          # Update and install feeds (required for luci-base and other dependencies)
           echo "=== Updating feeds ==="
           ./scripts/feeds update -a || true
+          ./scripts/feeds install -a || true
           
           # Copy config AFTER packages are cloned
           echo "=== Copying config ==="
