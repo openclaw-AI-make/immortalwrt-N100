@@ -127,7 +127,7 @@ jobs:
 
       - name: Build Firmware
         id: build
-        timeout-minutes: 120
+        timeout-minutes: 240
         run: |
           cd immortalwrt
           
